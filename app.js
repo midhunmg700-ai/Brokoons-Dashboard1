@@ -60,7 +60,7 @@ async function loadTeamImages() {
 }
 
 // ======================
-// 4. HANDLE IMAGE UPLOAD
+// 4. HANDLE IMAGE UPLOAD (DEBUG VERSION)
 // ======================
 uploadBtn.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', handleImageUpload);
@@ -68,51 +68,70 @@ fileInput.addEventListener('change', handleImageUpload);
 async function handleImageUpload(event) {
   const files = event.target.files;
   if (!files || files.length === 0) return;
+  
+  console.log('=== UPLOAD DEBUG START ===');
 
   for (const file of files) {
+    console.log('Processing file:', file.name, 'Size:', file.size, 'Type:', file.type);
+    
     // Step 1: Upload file to Supabase Storage
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
     
-    console.log('Uploading:', fileName);
+    console.log('Generated filename:', fileName);
     
-    const { data: storageData, error: storageError } = await supabase.storage
-      .from('team-images')
-      .upload(fileName, file);
+    try {
+      console.log('Attempting storage upload...');
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from('team-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-    if (storageError) {
-      console.error('❌ Storage upload error:', storageError);
-      alert('Upload failed: ' + storageError.message);
-      continue;
-    }
+      if (storageError) {
+        console.error('❌ STORAGE UPLOAD FAILED:', storageError);
+        console.error('Error code:', storageError.statusCode);
+        console.error('Error message:', storageError.message);
+        alert('Storage upload failed: ' + storageError.message);
+        continue;
+      }
 
-    console.log('✅ Storage upload successful');
+      console.log('✅ STORAGE UPLOAD SUCCESS:', storageData);
+      
+      // Step 2: Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('team-images')
+        .getPublicUrl(fileName);
+      
+      console.log('Public URL:', publicUrlData.publicUrl);
 
-    // Step 2: Get public URL
-    const { data: publicUrlData } = supabase.storage
-      .from('team-images')
-      .getPublicUrl(fileName);
+      // Step 3: Save to database
+      console.log('Saving to database...');
+      const { error: dbError } = await supabase
+        .from('team_images')
+        .insert([
+          {
+            image_url: publicUrlData.publicUrl,
+            uploaded_by: 'Team Member',
+            title: file.name
+          }
+        ]);
 
-    // Step 3: Save to database
-    const { error: dbError } = await supabase
-      .from('team_images')
-      .insert([
-        {
-          image_url: publicUrlData.publicUrl,
-          uploaded_by: 'Team Member',
-          title: file.name
-        }
-      ]);
-
-    if (dbError) {
-      console.error('Database error:', dbError);
-    } else {
-      console.log('✅ Image saved to database');
+      if (dbError) {
+        console.error('❌ DATABASE SAVE FAILED:', dbError);
+      } else {
+        console.log('✅ Database save successful');
+      }
+      
+    } catch (error) {
+      console.error('❌ UNEXPECTED ERROR:', error);
     }
   }
 
   // Step 4: Reload images
   fileInput.value = '';
+  console.log('=== UPLOAD DEBUG END ===');
   await loadTeamImages();
 }
 
