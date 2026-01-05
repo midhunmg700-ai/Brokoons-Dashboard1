@@ -1575,6 +1575,70 @@
     </div>
 
     <!-- Load ONLY app.js as module -->
-    <script type="module" src="app.js"></script>
+    <script src="app.js"></script>
+    <script >
+        // ADD THIS LINE:
+    if (window.appAlreadyLoaded) { return; }
+// ========== SUPABASE CONFIGURATION ==========
+const SUPABASE_URL = 'https://dmrghgbbsvqlqmzuvbpb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtcmdoZ2Jic3ZxbHFtenV2YnBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyNDUxNTgsImV4cCI6MjA1MTgyMTE1OH0.PGih7eEJ-Vf9XY47Ck9Moi3pSWerM6d61_JSPxImsIw';
+
+// Simple login function to test
+function quickLogin() {
+    const username = prompt("Username (midhun/akash/sajad/saran/muhammad):");
+    const password = prompt("Password:");
+    
+    const TEAM_USERS = {
+        "midhun": "1977",
+        "akash": "2024", 
+        "sajad": "5550",
+        "saran": "2244",
+        "muhammad": "1415"
+    };
+    
+    if (TEAM_USERS[username] && TEAM_USERS[username] === password) {
+        localStorage.setItem('brokoons_auth', 'true');
+        localStorage.setItem('brokoons_user', username);
+        alert(`Login successful! Welcome ${username}`);
+        window.location.reload();
+    } else {
+        alert('Invalid credentials');
+    }
+}
+
+// Show login button
+document.addEventListener('DOMContentLoaded', function() {
+    const loginScreen = document.getElementById('loginScreen');
+    const mainContent = document.getElementById('mainContent');
+    
+    if (loginScreen && mainContent) {
+        // Add quick login button
+        const loginContainer = loginScreen.querySelector('.login-container');
+        if (loginContainer) {
+            const quickBtn = document.createElement('button');
+            quickBtn.textContent = 'Quick Test Login';
+            quickBtn.style.background = '#ff9800';
+            quickBtn.style.color = 'black';
+            quickBtn.style.padding = '10px';
+            quickBtn.style.marginTop = '10px';
+            quickBtn.style.borderRadius = '6px';
+            quickBtn.style.border = 'none';
+            quickBtn.style.cursor = 'pointer';
+            quickBtn.onclick = quickLogin;
+            loginContainer.appendChild(quickBtn);
+        }
+        
+        // Check if already logged in
+        if (localStorage.getItem('brokoons_auth') === 'true') {
+            loginScreen.style.display = 'none';
+            mainContent.style.display = 'block';
+            document.getElementById('currentUser').textContent = localStorage.getItem('brokoons_user');
+        }
+    }
+    
+    console.log('Quick login script loaded');
+});
+</script>
 </body>
 </html>
+
