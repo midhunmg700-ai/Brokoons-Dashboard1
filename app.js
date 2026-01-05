@@ -19,6 +19,24 @@ const imageGrid = document.getElementById('image-grid');
 const emptyState = document.getElementById('empty-state');
 
 // ======================
+// DEBUG TEST: IS EVERYTHING CONNECTED?
+// ======================
+console.log('🔄 APP STARTING...');
+console.log('Upload button found:', uploadBtn);
+console.log('File input found:', fileInput);
+
+// Test click event
+uploadBtn.addEventListener('click', () => {
+    console.log('✅ UPLOAD BUTTON CLICKED!');
+});
+
+// Test file input change
+fileInput.addEventListener('change', (event) => {
+    console.log('✅ FILE SELECTED:', event.target.files[0]?.name);
+    handleImageUpload(event); // Manually trigger our function
+});
+
+// ======================
 // 2. ANONYMOUS AUTHENTICATION (REQUIRED FOR UPLOADS)
 // ======================
 const authenticateApp = async () => {
@@ -62,9 +80,6 @@ async function loadTeamImages() {
 // ======================
 // 4. HANDLE IMAGE UPLOAD (DEBUG VERSION)
 // ======================
-uploadBtn.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', handleImageUpload);
-
 async function handleImageUpload(event) {
   const files = event.target.files;
   if (!files || files.length === 0) return;
