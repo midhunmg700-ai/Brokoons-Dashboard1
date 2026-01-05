@@ -1593,7 +1593,7 @@ document.addEventListener('gesturestart', function(event) {
 
 document.addEventListener('wheel', function(event) {
     if (event.ctrlKey) {
-        event.preventDefault();
+  event.preventDefault();
     }
 }, { passive: false });
 
@@ -1606,12 +1606,25 @@ document.addEventListener('touchend', function(event) {
     }
     lastTouchEnd = now;
 }, false);
-        // ========== DATA MANAGEMENT ==========
-        function loadAllData() {
-            // Load team members
-            const savedTeam = localStorage.getItem('brokoons_team_members');
-            if (savedTeam) {
-                teamMembers = JSON.parse(savedTeam);
+
+// ========== PWA SERVICE WORKER ==========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/Brokoons-Dashboard1/sw.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful');
+      })
+      .catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+
+// ========== DATA MANAGEMENT ==========
+function loadAllData() {
+    const savedTeam = localStorage.getItem('brokoons_team_members');
+    if (savedTeam) {
+        teamMembers = JSON.parse(savedTeam);
             } else {
                 teamMembers = [
                     { 
@@ -3108,6 +3121,7 @@ document.addEventListener('touchend', function(event) {
 </body>
 
 </html>
+
 
 
 
