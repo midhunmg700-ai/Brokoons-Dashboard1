@@ -1629,3 +1629,6 @@ setTimeout(testEverything, 2000);
 
 console.log('✅ app.js fully loaded with Supabase integration!');
 console.log('📊 Dashboard ready. Current user:', currentUser);
+// ADD THIS AT THE VERY END OF app.js
+window.appAlreadyLoaded = true;
+console.log("✅ app.js loaded successfully");
