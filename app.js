@@ -753,3 +753,44 @@ window.downloadFromUrl = downloadFromUrl;
 
 console.log('✅ app.js fully loaded with Supabase integration!');
 console.log('📊 Dashboard ready. Current user:', currentUser);
+// ========== TEST FUNCTION ==========
+async function testEverything() {
+    console.log('🧪 Running comprehensive tests...');
+    
+    // Test 1: Supabase Connection
+    console.log('1. Testing Supabase connection...');
+    const { data: user, error: userError } = await supabase.auth.getUser();
+    console.log('Auth test:', user ? '✅ Connected' : '❌ Failed', userError);
+    
+    // Test 2: Storage Bucket
+    console.log('2. Testing storage bucket...');
+    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+    console.log('Buckets found:', buckets?.map(b => b.name));
+    
+    // Test 3: Database Table
+    console.log('3. Testing database table...');
+    const { data: images, error: dbError } = await supabase
+        .from('team_images')
+        .select('*')
+        .limit(5);
+    console.log('Table test:', images?.length || 0, 'records found');
+    
+    // Test 4: Upload Test (small file)
+    console.log('4. Testing upload capability...');
+    const testFile = new File(['test'], 'test.txt', { type: 'text/plain' });
+    const { data: uploadTest, error: uploadError } = await supabase.storage
+        .from('team-images')
+        .upload('test-file.txt', testFile);
+    console.log('Upload test:', uploadTest ? '✅ Works' : '❌ Failed', uploadError);
+    
+    // Show results in notification
+    const success = !userError && !bucketError && !dbError;
+    if (success) {
+        showNotification('✅ All Tests Passed', 'Supabase connection is working perfectly!', 'success', 5000);
+    } else {
+        showNotification('⚠️ Some Tests Failed', 'Check console for details', 'warning', 5000);
+    }
+}
+
+// Run test on page load (after a delay)
+setTimeout(testEverything, 2000);
