@@ -1,0 +1,3057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brokoons Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* MAIN STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* NOTIFICATION SYSTEM */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+        }
+        
+        .notification {
+            background: #1a1a1a;
+            border: 2px solid #2e7d32;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            animation: slideIn 0.3s forwards;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-icon {
+            font-size: 24px;
+            color: #4caf50;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            color: #4caf50;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .notification-message {
+            color: #ddd;
+            font-size: 14px;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .notification-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(400px);
+            }
+        }
+        
+        /* LOGIN SCREEN */
+        .login-screen {
+            margin: 0;
+            min-height: 100vh;
+            padding-top: 48px; /* safe notch distance */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000000;
+        }
+
+        /* Glow animation keyframes */
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 0 0 20px #2b7a4b, 0 0 40px rgba(43, 122, 75, 0.5), 0 0 60px rgba(43, 122, 75, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px #2b7a4b, 0 0 60px rgba(43, 122, 75, 0.5), 0 0 90px rgba(43, 122, 75, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 20px #2b7a4b, 0 0 40px rgba(43, 122, 75, 0.5), 0 0 60px rgba(43, 122, 75, 0.3);
+            }
+        }
+
+        .login-container {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            padding: 40px 30px;
+            border-radius: 16px;
+            border: 2px solid rgba(43, 122, 75, 0.5); /* green border */
+            background: rgba(255, 255, 255, 0.05); /* glass effect */
+            backdrop-filter: blur(10px); /* frosted glass */
+            -webkit-backdrop-filter: blur(10px);
+            animation: glowPulse 2s infinite ease-in-out; /* glowing pulse */
+        }
+
+        .login-container img {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+
+        .login-container h1 {
+            margin-bottom: 20px;
+            color: #2b7a4b;
+            text-shadow: 0 0 10px #2b7a4b;
+            font-size: 24px;
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .login-form input[type="text"], 
+        .login-form input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+
+        .login-form input::placeholder {
+            color: #cccccc;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 12px;
+            background-color: #2b7a4b;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            background-color: #24663b;
+        }
+
+        .footer-text {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        @media (max-width: 360px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            .login-form input[type="text"], 
+            .login-form input[type="password"], 
+            .login-btn {
+                font-size: 14px;
+            }
+        }
+        
+        /* MAIN DASHBOARD */
+        .main-content {
+            display: none;
+        }
+        
+        /* HEADER */
+        .header {
+            background: #0a0a0a;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #1b5e20;
+        }
+        
+       .logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logo .logo-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: #4caf50;
+}
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .nav a:hover {
+            background: rgba(27, 94, 32, 0.3);
+        }
+        
+        /* HERO SECTION */
+        .hero {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(27, 94, 32, 0.9), rgba(46, 125, 50, 0.9));
+            color: white;
+            margin: 20px;
+            border-radius: 12px;
+            border: 1px solid #2e7d32;
+        }
+        
+        /* TABS */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 500;
+            color: #ccc;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .tab-btn.active {
+            background: #1b5e20;
+            color: white;
+            border-color: #2e7d32;
+        }
+        
+        .tab-content {
+            display: none;
+            width: 100%;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .card {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #2e7d32;
+        }
+        
+        .card h3 {
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+        
+        .card p {
+            color: #bbb;
+            font-size: 14px;
+        }
+        
+        /* TABLES */
+        .table-section {
+            background: #1a1a1a;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            overflow-x: auto;
+        }
+        
+        .table-section h2 {
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            min-width: 600px;
+        }
+        
+        th {
+            background: #1b5e20;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            border: 1px solid #2e7d32;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            color: #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background: #222;
+        }
+        
+        /* BUTTONS */
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin: 2px;
+            transition: all 0.3s;
+        }
+        
+        .btn-edit {
+            background: #1b5e20;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #2e7d32;
+        }
+        
+        .btn-delete {
+            background: #5c2a2a;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #7a3a3a;
+        }
+        
+        .btn-remove {
+            background: #d32f2f;
+            color: white;
+        }
+        
+        .btn-remove:hover {
+            background: #f44336;
+        }
+        
+        .btn-rename {
+            background: #ff9800;
+            color: black;
+        }
+        
+        .btn-rename:hover {
+            background: #ffb74d;
+        }
+        
+        .btn-view {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: #42A5F5;
+        }
+        
+        /* STATUS BADGES */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .badge-success {
+            background: #1b5e20;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #ff9800;
+            color: black;
+        }
+        
+        .badge-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .badge-offline {
+            background: #666;
+            color: white;
+        }
+        
+        /* TO-DO LIST */
+        .todo-list {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            margin: 20px;
+        }
+        
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .todo-text {
+            flex: 1;
+            color: #ddd;
+        }
+        
+        .todo-completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+        
+        .todo-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .task-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(27, 94, 32, 0.1);
+            border-radius: 8px;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            font-size: 12px;
+            color: #4caf50;
+            min-width: 70px;
+            text-align: right;
+        }
+        
+        /* FORM ELEMENTS */
+        input, select, textarea {
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        /* QUALITY SCORE */
+        .quality-score {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .quality-bar {
+            flex: 1;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .quality-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4caf50, #8bc34a);
+            border-radius: 10px;
+        }
+        
+        /* FARM SCHEDULE */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .schedule-day {
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        /* TEAM GRAPH - Founder Only */
+        .team-graph {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            margin: 20px;
+            display: none;
+        }
+        
+        .graph-container {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .graph-bar {
+            flex: 1;
+            background: #4caf50;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 10px;
+        }
+        
+        .graph-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #bbb;
+        }
+        
+        .graph-value {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #4caf50;
+        }
+        
+        /* FOOTER */
+        .footer {
+            background: #0a0a0a;
+            color: #888;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 1px solid #333;
+        }
+        
+        /* PHOTO UPLOAD SECTION - ENHANCED */
+        .photo-upload-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #4CAF50;
+            margin: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .upload-area {
+            border: 3px dashed #4CAF50;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(76, 175, 80, 0.05);
+        }
+        
+        .upload-area:hover {
+            background: rgba(46, 125, 50, 0.1);
+            border-color: #66BB6A;
+            transform: translateY(-2px);
+        }
+        
+        .upload-btn {
+            background: #1b5e20;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .photo-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #333;
+            transition: all 0.3s;
+        }
+        
+        .photo-item:hover {
+            transform: translateY(-5px);
+            border-color: #4CAF50;
+            box-shadow: 0 8px 15px rgba(76, 175, 80, 0.2);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .photo-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .photo-info {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .photo-name {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .photo-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 10px;
+            color: #bbb;
+        }
+        
+        /* Progress bar for uploads */
+        .upload-progress {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .upload-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* Photo count */
+        .photo-count {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #4CAF50;
+        }
+        
+        /* DATE DISPLAY */
+        .date-display {
+            background: #1a1a1a;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #2e7d32;
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        /* INPUT FIELDS FOR QUALITY METRICS */
+        .metric-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        
+        .metric-input input {
+            width: 80px;
+            padding: 8px;
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .metric-display {
+            color: #4caf50;
+            font-weight: bold;
+            min-width: 50px;
+        }
+        
+        /* MODAL FOR VIEWING DETAILS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid #2e7d32;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .modal-title {
+            color: #4caf50;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .member-photo-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .member-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #2e7d32;
+            margin-bottom: 15px;
+            background: #222;
+        }
+        
+        .photo-upload-btn {
+            background: #1b5e20;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .photo-upload-btn:hover {
+            background: #2e7d32;
+        }
+        
+        .member-details {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .detail-item {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .detail-label {
+            color: #4caf50;
+            font-weight: bold;
+            min-width: 120px;
+        }
+        
+        .detail-value {
+            color: #ddd;
+            flex: 1;
+        }
+        
+        /* Photo preview modal */
+        .photo-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .photo-preview-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .photo-preview-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .photo-preview-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .photo-preview-info {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            color: white;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        /* Auto-clear animation for completed tasks */
+        .clear-animation {
+            animation: clearTasks 1s forwards;
+        }
+        
+        @keyframes clearTasks {
+            0% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(100px);
+                height: 0;
+                padding: 0;
+                margin: 0;
+                border: none;
+            }
+        }
+        
+        /* Task reset animation */
+        .reset-checkbox {
+            animation: resetCheckbox 0.5s ease;
+        }
+        
+        @keyframes resetCheckbox {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+            }
+            
+            .hero, .table-section, .cards, .todo-list, .team-graph, .photo-upload-section {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .graph-container {
+                flex-direction: column;
+                height: auto;
+                gap: 10px;
+            }
+            
+            .graph-bar {
+                height: 40px;
+                width: 100%;
+            }
+            
+            .photo-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .metric-input {
+                flex-wrap: wrap;
+            }
+            
+            .metric-input input {
+                width: 60px;
+            }
+            
+            .notification-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+            
+            .notification {
+                max-width: 100%;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .detail-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .detail-label {
+                min-width: auto;
+            }
+            
+            .upload-area {
+                padding: 20px;
+            }
+        }
+        
+        /* SMALL SCREEN FIXES */
+        @media (max-width: 480px) {
+            .login-container {
+                width: 95%;
+                padding: 30px 20px;
+            }
+            
+            .login-container img {
+                width: 80px;
+            }
+            
+            .login-container h1 {
+                font-size: 20px;
+            }
+            
+            .tab-btn {
+                min-width: 70px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+            
+            .btn {
+                padding: 4px 8px;
+                font-size: 11px;
+                margin: 1px;
+            }
+            
+            .member-photo {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .photo-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NOTIFICATION CONTAINER -->
+    <div class="notification-container" id="notificationContainer"></div>
+    
+    <!-- PHOTO PREVIEW MODAL -->
+    <div class="photo-preview-modal" id="photoPreviewModal">
+        <div class="photo-preview-content">
+            <img class="photo-preview-img" src="" alt="">
+            <button class="photo-preview-close" onclick="closePhotoPreview()">×</button>
+            <div class="photo-preview-info" id="photoPreviewInfo"></div>
+        </div>
+    </div>
+    
+    <!-- MEMBER DETAILS MODAL -->
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalMemberName">Member Details</h2>
+                <button class="modal-close" onclick="closeMemberModal()">×</button>
+            </div>
+            <div class="member-photo-section">
+                <img id="modalMemberPhoto" class="member-photo" src="" alt="Member Photo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 fill=%22%234caf50%22 font-size=%2240%22>👤</text></svg>'">
+                <div style="margin-top: 10px;">
+                    <input type="file" id="memberPhotoUpload" accept="image/*" style="display: none;" onchange="uploadMemberPhoto(event)">
+                    <button class="photo-upload-btn" onclick="document.getElementById('memberPhotoUpload').click()" id="uploadPhotoBtn" style="display: none;">📷 Upload Photo</button>
+                </div>
+            </div>
+            <div class="member-details">
+                <div class="detail-item">
+                    <div class="detail-label">Role:</div>
+                    <div class="detail-value" id="modalMemberRole">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Department:</div>
+                    <div class="detail-value" id="modalMemberDepartment">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Status:</div>
+                    <div class="detail-value" id="modalMemberStatus">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Joined Date:</div>
+                    <div class="detail-value" id="modalMemberJoined">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Performance:</div>
+                    <div class="detail-value" id="modalMemberPerformance">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Details:</div>
+                    <div class="detail-value" id="modalMemberDetails">No additional details available.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LOGIN SCREEN - SHOWN BY DEFAULT -->
+    <!-- LOGIN SCREEN - SHOWN BY DEFAULT -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-container">
+        <img src="brl2.png" alt="Brokoons Logo" onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%231b5e20%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 fill=%22%23ffffff%22 font-size=%2240%22 font-family=%22Arial%22></text></svg>'">
+        <h1>Brokoons Dashboard</h1>
+        
+        <div class="login-form">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button class="login-btn" onclick="login()">Login</button>
+            <div id="loginError" class="error-message">Invalid username or password</div>
+        </div>
+        
+        <div class="footer-text">
+            © 2026 Brokoons. Internal use only.
+        </div>
+    </div>
+</div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="mainContent" class="main-content">
+        <header class="header">
+    <div class="logo">
+        <img src="brl2.png" alt="Brokoons Logo" style="height: 40px; width: auto;" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size: 30px; color: #4caf50;\'>🍄</span><span class=\'logo-text\'>Brokoons</span>'">
+        <span class="logo-text">Brokoons</span>
+    </div>
+    <nav class="nav">
+        <a href="#" onclick="showTab('dashboard')">Dashboard</a>
+        <a href="#" onclick="showTab('stock')">Stock</a>
+        <a href="#" onclick="showTab('progress')">Updates</a>
+        <a href="#" onclick="showTab('team')">Team</a>
+        <a href="#" onclick="logout()" style="color: #ff6b6b;">Logout</a>
+    </nav>
+</header>
+
+        <section class="hero">
+            <h1>Brokoons Internal System</h1>
+            <p>Track stock, progress, and team activity</p>
+        </section>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="showTab('stock')">📦 Stock</button>
+            <button class="tab-btn" onclick="showTab('progress')">📈 Updates</button>
+            <button class="tab-btn" onclick="showTab('team')">👥 Team</button>
+        </div>
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard-tab" class="tab-content active">
+            <section class="cards">
+                <div class="card" onclick="showTab('stock')">
+                    <h3>📦 Stock Overview</h3>
+                    <p>Current stock: <strong id="stock-total" style="color: #4caf50;">0</strong> items</p>
+                </div>
+                <div class="card" onclick="showTab('progress')">
+                    <h3>📊 Farm Progress</h3>
+                    <p>Quality Score: <strong id="quality-score-value" style="color: #4caf50;">0/100</strong></p>
+                </div>
+                <div class="card" onclick="showTab('team')">
+                    <h3>👥 Team Activity</h3>
+                    <p><strong id="online-count" style="color: #4caf50;">0</strong> members online</p>
+                </div>
+            </section>
+
+            <div class="table-section">
+                <h2>📋 Recent Stock Activity</h2>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-table-body">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- STOCK TAB -->
+        <div id="stock-tab" class="tab-content">
+            <div class="hero">
+                <h2>📦 Stock Management</h2>
+                <p>Manage inventory, track supplies, and monitor stock levels</p>
+            </div>
+            
+            <section class="cards">
+                <div class="card" onclick="addStockItem()">
+                    <h3>➕ Add New Item</h3>
+                    <p>Register new stock items</p>
+                </div>
+                <div class="card" onclick="showLowStock()">
+                    <h3>⚠️ Low Stock Alert</h3>
+                    <p id="low-stock-count" style="color: #ff9800;">0 items need attention</p>
+                </div>
+                <div class="card" onclick="exportData()">
+                    <h3>📊 Export Reports</h3>
+                    <p>Download inventory data</p>
+                </div>
+            </section>
+
+            <div class="table-section">
+                <h2>Inventory List</h2>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="search-stock" placeholder="🔍 Search items..." style="background: #222; color: white; border: 1px solid #333; padding: 10px; width: 100%; max-width: 400px; border-radius: 6px;">
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROGRESS TAB -->
+        <div id="progress-tab" class="tab-content">
+            <div class="hero">
+                <h2>📈 Production Updates</h2>
+                <p>Track growth, harvest cycles, and performance metrics</p>
+            </div>
+            
+            <section class="cards">
+                <div class="card" onclick="showDailyReport()">
+                    <h3>📅 Daily Report</h3>
+                    <p>Click to view today's report</p>
+                </div>
+                <div class="card" onclick="showFarmSchedule()">
+                    <h3>📆 Farm Schedule</h3>
+                    <p>View farming schedule</p>
+                </div>
+                <div class="card" onclick="showQualityMetrics()">
+                    <h3>⭐ Quality Score</h3>
+                    <p>Current: <strong id="main-quality-score" style="color: #4caf50;">0/100</strong></p>
+                </div>
+            </section>
+
+            <!-- ENHANCED PHOTO UPLOAD SECTION -->
+            <div class="photo-upload-section">
+                <h2 style="color: #4caf50; margin-bottom: 15px;">📸 Photo Upload</h2>
+                <p style="color: #bbb; margin-bottom: 15px;">Upload photos of mushroom growth, harvest, or issues</p>
+                
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('photoUpload').click()">
+                    <div style="font-size: 50px; color: #4caf50;">📷</div>
+                    <p style="color: #ddd; margin: 10px 0; font-size: 18px;">Click to upload photos</p>
+                    <p style="color: #888; font-size: 12px;">Supports JPG, PNG (Max 5MB)</p>
+                    <input type="file" id="photoUpload" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event)">
+                </div>
+                
+                <!-- Upload Progress Bar -->
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                </div>
+                
+                <!-- Photo Count -->
+                <div class="photo-count">
+                    <span id="photoCount">0</span> photos uploaded
+                </div>
+                
+                <!-- Photo Gallery -->
+                <div id="photoGallery" class="photo-gallery">
+                    <!-- Photos will be loaded here -->
+                </div>
+            </div>
+
+            <!-- TO-DO LIST FOR DAILY REPORT -->
+            <div class="todo-list">
+                <h2 style="color: #4caf50; margin-bottom: 15px;">✅ Daily Task Checklist</h2>
+                <div style="margin-bottom: 15px;">
+                    <div class="task-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="task-progress-fill"></div>
+                        </div>
+                        <div class="progress-text" id="task-progress-text">0/0 (0%)</div>
+                    </div>
+                </div>
+                <div id="todo-list-container">
+                    <!-- Tasks will be added by JavaScript -->
+                </div>
+                <button onclick="addTodoItem()" style="background: #1b5e20; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin-top: 15px; cursor: pointer;">+ Add New Task</button>
+            </div>
+
+            <!-- FARM SCHEDULE -->
+            <div class="table-section">
+                <h2>📆 Farm Schedule</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span>Weekly farming activities</span>
+                    <button onclick="editFarmSchedule()" class="btn btn-edit">Edit Schedule</button>
+                </div>
+                <div class="schedule-grid" id="farm-schedule-grid">
+                    <!-- Schedule will be loaded by JavaScript -->
+                </div>
+            </div>
+
+            <!-- QUALITY SCORE -->
+            <div class="table-section">
+                <h2>⭐ Quality Metrics</h2>
+                <div class="date-display" id="current-date">
+                    <!-- Today's date will be displayed here -->
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div class="quality-score">
+                        <span>Overall Quality:</span>
+                        <div class="quality-bar">
+                            <div class="quality-fill" id="quality-bar" style="width: 0%"></div>
+                        </div>
+                        <span id="quality-percentage">0%</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #4caf50; margin-bottom: 15px;">Enter Your Numbers:</h3>
+                    <div class="metric-input">
+                        <label>Mushroom Size (cm):</label>
+                        <input type="number" id="size-input" min="0" max="30" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="size-display">0/100</span>
+                    </div>
+                    <div class="metric-input">
+                        <label>Color Score (0-10):</label>
+                        <input type="number" id="color-input" min="0" max="10" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="color-display">0/100</span>
+                    </div>
+                    <div class="metric-input">
+                        <label>Growth Rate (%):</label>
+                        <input type="number" id="growth-input" min="0" max="100" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="growth-display">0/100</span>
+                    </div>
+                    <div class="metric-input">
+                        <label>Yield (kg):</label>
+                        <input type="number" id="yield-input" min="0" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="yield-display">0/100</span>
+                    </div>
+                    <div class="metric-input">
+                        <label>Harvested Today:</label>
+                        <input type="number" id="harvest-input" min="0" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="harvest-display">0 bags</span>
+                    </div>
+                </div>
+                <button onclick="saveQualityMetrics()" style="background: #1b5e20; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 10px;">Save Quality Metrics</button>
+            </div>
+
+            <!-- WEEKLY PROGRESS LOG -->
+            <div class="table-section">
+                <h2>📊 Weekly Progress Log</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span>This week's performance</span>
+                    <button onclick="addProgressLog()" class="btn btn-edit">Add Entry</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="progress-log-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Batches</th>
+                                <th>Growth</th>
+                                <th>Yield</th>
+                                <th>Quality</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEAM TAB -->
+        <div id="team-tab" class="tab-content">
+            <div class="hero">
+                <h2>👥 Team Management</h2>
+                <p>Manage team members, roles, and responsibilities</p>
+            </div>
+            
+            <section class="cards">
+                <div class="card" onclick="addTeamMember()">
+                    <h3>➕ Add Member</h3>
+                    <p>Register new team members</p>
+                </div>
+                <div class="card" onclick="showTeamGraph()">
+                    <h3>📊 Team Graph</h3>
+                    <p>View team performance</p>
+                </div>
+                <div class="card" onclick="showPerformance()">
+                    <h3>⭐ Performance</h3>
+                    <p>Productivity metrics</p>
+                </div>
+            </section>
+
+            <div class="table-section">
+                <h2>Team Directory</h2>
+                <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Total Members: <strong id="total-members">0</strong></span>
+                    <button onclick="addTeamMember()" class="btn btn-edit" id="addMemberBtn" style="display: none;">+ Add Member</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                                <th>Details</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="team-table">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TEAM GRAPH - Founder Only -->
+            <div id="teamGraph" class="team-graph">
+                <h2>📊 Team Performance Graph</h2>
+                <p style="color: #bbb; margin-bottom: 15px;">Productivity metrics for the past 7 days</p>
+                <div class="graph-container" id="graphContainer">
+                    <!-- Graph bars will be added by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>© 2026 Brokoons | Internal Use Only</p>
+            <p style="font-size: 12px; color: #666;">Logged in as: <span id="currentUser">Guest</span></p>
+        </footer>
+    </div>
+
+    <script>
+        // ========== AUTHENTICATION ==========
+        const TEAM_USERS = {
+            "midhun": {password: "1977", role: "founder"},
+            "akash": {password: "2024", role: "cofounder"},
+            "sajad": {password: "5550", role: "marketing"},
+            "saran": {password: "2244", role: "accountant"},
+            "muhammad": {password: "1415", role: "social"}
+        };
+        
+        let currentUser = null;
+        let currentTab = 'progress';
+        let hasShownAllTasksNotification = false;
+        let currentViewingMember = null;
+        let autoClearTimer = null;
+        
+        // ========== DATA MANAGEMENT ==========
+        function loadAllData() {
+            // Load team members
+            const savedTeam = localStorage.getItem('brokoons_team_members');
+            if (savedTeam) {
+                teamMembers = JSON.parse(savedTeam);
+            } else {
+                teamMembers = [
+                    { 
+                        name: "Midhun", 
+                        role: "Founder", 
+                        department: "Management", 
+                        details: "Overall management and strategy planning. 5+ years experience in mushroom farming.", 
+                        status: "online", 
+                        lastOnline: Date.now(),
+                        joinedDate: "01/01/2025",
+                        performance: "95%",
+                        photo: null
+                    },
+                    { 
+                        name: "Akash", 
+                        role: "Co-Founder", 
+                        department: "Operations", 
+                        details: "Handles day-to-day operations and farm management. Expert in organic farming techniques.", 
+                        status: "online", 
+                        lastOnline: Date.now(),
+                        joinedDate: "02/01/2025",
+                        performance: "92%",
+                        photo: null
+                    },
+                    { 
+                        name: "Mohammad Sajad", 
+                        role: "Marketing Head", 
+                        department: "Marketing", 
+                        details: "Marketing and sales strategy. Manages client relationships and market research.", 
+                        status: "online", 
+                        lastOnline: Date.now(),
+                        joinedDate: "20/01/2025",
+                        performance: "90%",
+                        photo: null
+                    },
+                    { 
+                        name: "Saran Kumar", 
+                        role: "Accountant", 
+                        department: "Finance", 
+                        details: "Financial management, budgeting, and accounts. Ensures financial compliance.", 
+                        status: "offline", 
+                        lastOnline: null,
+                        joinedDate: "5/02/2025",
+                        performance: "89%",
+                        photo: null
+                    },
+                    { 
+                        name: "Muhammad N", 
+                        role: "Social Media", 
+                        department: "Marketing", 
+                        details: "Social media management and digital presence. Creates content and engages with audience.", 
+                        status: "offline", 
+                        lastOnline: null,
+                        joinedDate: "06/02/2025",
+                        performance: "70%",
+                        photo: null
+                    }
+                ];
+            }
+            
+            // Load stock items
+            const savedStock = localStorage.getItem('brokoons_stock_items');
+            stockItems = savedStock ? JSON.parse(savedStock) : [];
+            
+            // Load progress logs
+            const savedLogs = localStorage.getItem('brokoons_progress_logs');
+            progressLogs = savedLogs ? JSON.parse(savedLogs) : [];
+            
+            // Load quality metrics
+            const savedMetrics = localStorage.getItem('brokoons_quality_metrics');
+            qualityMetrics = savedMetrics ? JSON.parse(savedMetrics) : {
+                overall: 0,
+                size: 0,
+                color: 0,
+                growth: 0,
+                yield: 0,
+                harvest: 0,
+                lastUpdated: getCurrentDate()
+            };
+            
+            // Load farm schedule
+            const savedSchedule = localStorage.getItem('brokoons_farm_schedule');
+            farmSchedule = savedSchedule ? JSON.parse(savedSchedule) : [
+                { day: "Monday", tasks: ["Watering", "Temperature check", "Harvesting"] },
+                { day: "Tuesday", tasks: ["Spore collection", "Cleaning", "Data recording"] },
+                { day: "Wednesday", tasks: ["Watering", "Pest check", "Harvesting"] },
+                { day: "Thursday", tasks: ["New batch setup", "Quality check"] },
+                { day: "Friday", tasks: ["Watering", "Harvesting", "Weekly report"] }
+            ];
+            
+            // Load todo items
+            const savedTodos = localStorage.getItem('brokoons_todo_items');
+            if (savedTodos) {
+                todoItems = JSON.parse(savedTodos);
+            } else {
+                todoItems = [
+                    { id: 1, text: "Check mushroom growth progress", completed: false },
+                    { id: 2, text: "Record temperature and humidity", completed: false },
+                    { id: 3, text: "Water mushroom beds", completed: false },
+                    { id: 4, text: "Harvest mature mushrooms", completed: false },
+                    { id: 5, text: "Clean and sterilize equipment", completed: false }
+                ];
+            }
+            
+            // Load photos
+            const savedPhotos = localStorage.getItem('brokoons_photos');
+            uploadedPhotos = savedPhotos ? JSON.parse(savedPhotos) : [];
+            
+            // Load team performance
+            const savedPerformance = localStorage.getItem('brokoons_team_performance');
+            if (savedPerformance) {
+                teamPerformance = JSON.parse(savedPerformance);
+            } else {
+                teamPerformance = [
+                    { name: "Midhun", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#4CAF50" },
+                    { name: "Akash", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#2196F3" },
+                    { name: "Sajad", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#FF9800" },
+                    { name: "Saran", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#9C27B0" },
+                    { name: "Muhammad", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#00BCD4" }
+                ];
+            }
+        }
+        
+        function getRandomScore() {
+            return Math.floor(Math.random() * 60) + 40;
+        }
+        
+        function saveAllData() {
+            localStorage.setItem('brokoons_team_members', JSON.stringify(teamMembers));
+            localStorage.setItem('brokoons_stock_items', JSON.stringify(stockItems));
+            localStorage.setItem('brokoons_progress_logs', JSON.stringify(progressLogs));
+            localStorage.setItem('brokoons_quality_metrics', JSON.stringify(qualityMetrics));
+            localStorage.setItem('brokoons_farm_schedule', JSON.stringify(farmSchedule));
+            localStorage.setItem('brokoons_todo_items', JSON.stringify(todoItems));
+            localStorage.setItem('brokoons_photos', JSON.stringify(uploadedPhotos));
+            localStorage.setItem('brokoons_team_performance', JSON.stringify(teamPerformance));
+        }
+        
+        let teamMembers = [];
+        let stockItems = [];
+        let progressLogs = [];
+        let qualityMetrics = {};
+        let farmSchedule = [];
+        let todoItems = [];
+        let teamPerformance = [];
+        let uploadedPhotos = [];
+        
+        // ========== UTILITY FUNCTIONS ==========
+        function getCurrentDate() {
+            const now = new Date();
+            return `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'Unknown';
+            const now = Date.now();
+            const diff = now - timestamp;
+            
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return `${days}d ago`;
+        }
+        
+        // ========== NOTIFICATION SYSTEM ==========
+        function showNotification(title, message, type = 'info', duration = 5000) {
+            const container = document.getElementById('notificationContainer');
+            const notificationId = 'notification-' + Date.now();
+            
+            let icon = 'ℹ️';
+            let borderColor = '#2e7d32';
+            
+            switch(type) {
+                case 'success': icon = '✅'; borderColor = '#4CAF50'; break;
+                case 'warning': icon = '⚠️'; borderColor = '#FF9800'; break;
+                case 'error': icon = '❌'; borderColor = '#F44336'; break;
+                case 'tasks': icon = '🎯'; borderColor = '#2196F3'; break;
+                case 'photo': icon = '📸'; borderColor = '#9C27B0'; break;
+                case 'edit': icon = '✏️'; borderColor = '#FF9800'; break;
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.id = notificationId;
+            notification.style.borderColor = borderColor;
+            
+            notification.innerHTML = `
+                <div class="notification-icon">${icon}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close" onclick="removeNotification('${notificationId}')">×</button>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                removeNotification(notificationId);
+            }, duration);
+            
+            return notificationId;
+        }
+        
+        function removeNotification(id) {
+            const notification = document.getElementById(id);
+            if (notification) {
+                notification.style.animation = 'slideOut 0.3s forwards';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }
+        
+        // ========== TASK MANAGEMENT ==========
+        function updateTodo(id, completed) {
+            const item = todoItems.find(t => t.id === id);
+            if (item) {
+                const wasCompleted = item.completed;
+                item.completed = completed;
+                saveAllData();
+                updateTodoList();
+                
+                if (completed && !wasCompleted) {
+                    showNotification(
+                        '✅ Task Completed!',
+                        `"${item.text}" has been marked as completed.`,
+                        'success',
+                        3000
+                    );
+                    
+                    const checkbox = document.querySelector(`[data-id="${id}"] .todo-checkbox`);
+                    if (checkbox) {
+                        checkbox.classList.add('reset-checkbox');
+                        setTimeout(() => checkbox.classList.remove('reset-checkbox'), 500);
+                    }
+                } else if (!completed && wasCompleted) {
+                    showNotification(
+                        '↩️ Task Reopened',
+                        `"${item.text}" has been reopened.`,
+                        'info',
+                        3000
+                    );
+                }
+                
+                setTimeout(() => {
+                    const allCompleted = checkAllTasksCompleted();
+                    if (allCompleted) {
+                        startAutoResetTimer();
+                    }
+                }, 500);
+            }
+        }
+        
+        function startAutoResetTimer() {
+            if (autoClearTimer) {
+                clearTimeout(autoClearTimer);
+            }
+            
+            autoClearTimer = setTimeout(resetAllTasks, 3000);
+            
+            showNotification(
+                '🔄 Tasks Completed!',
+                'All tasks completed! Tasks will reset in 3 seconds...',
+                'success',
+                3000
+            );
+        }
+        
+        function resetAllTasks() {
+            if (todoItems.length === 0) return;
+            
+            const checkboxes = document.querySelectorAll('.todo-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                checkbox.classList.add('reset-checkbox');
+                checkbox.checked = false;
+                
+                const itemId = parseInt(checkbox.closest('.todo-item').dataset.id);
+                const item = todoItems.find(t => t.id === itemId);
+                if (item) {
+                    item.completed = false;
+                }
+            });
+            
+            saveAllData();
+            updateTodoList();
+            
+            showNotification(
+                '🔄 Tasks Reset',
+                `All ${todoItems.length} tasks have been reset to incomplete.`,
+                'info',
+                4000
+            );
+            
+            hasShownAllTasksNotification = false;
+            autoClearTimer = null;
+        }
+        
+        function checkAllTasksCompleted() {
+            if (todoItems.length === 0) return false;
+            
+            const completedCount = todoItems.filter(t => t.completed).length;
+            const totalCount = todoItems.length;
+            const percentage = Math.round((completedCount / totalCount) * 100);
+            const allCompleted = completedCount === totalCount && totalCount > 0;
+            
+            updateTaskProgress();
+            
+            if (percentage === 50 && completedCount === totalCount / 2) {
+                showNotification(
+                    '🎯 Halfway There!',
+                    `You've completed ${completedCount}/${totalCount} tasks! Keep going!`,
+                    'tasks',
+                    4000
+                );
+            } else if (percentage === 75) {
+                showNotification(
+                    '🔥 Almost Done!',
+                    `You're at ${completedCount}/${totalCount} tasks! Just a few more!`,
+                    'tasks',
+                    4000
+                );
+            } else if (percentage === 100 && allCompleted && !hasShownAllTasksNotification) {
+                createCelebrationEffect();
+                hasShownAllTasksNotification = true;
+                return true;
+            }
+            
+            if (!allCompleted) {
+                hasShownAllTasksNotification = false;
+            }
+            
+            return allCompleted;
+        }
+        
+        function createCelebrationEffect() {
+            const celebration = document.createElement('div');
+            celebration.style.position = 'fixed';
+            celebration.style.top = '50%';
+            celebration.style.left = '50%';
+            celebration.style.transform = 'translate(-50%, -50%)';
+            celebration.style.fontSize = '40px';
+            celebration.style.fontWeight = 'bold';
+            celebration.style.color = '#4CAF50';
+            celebration.style.zIndex = '2000';
+            celebration.style.opacity = '0';
+            celebration.style.transition = 'opacity 1s';
+            celebration.innerHTML = '🎉🎊 ALL TASKS DONE! 🎊🎉';
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                celebration.style.opacity = '1';
+            }, 100);
+            
+            setTimeout(() => {
+                celebration.style.opacity = '0';
+                setTimeout(() => {
+                    if (celebration.parentNode) {
+                        celebration.parentNode.removeChild(celebration);
+                    }
+                }, 1000);
+            }, 2000);
+        }
+        
+        function editTodo(id) {
+            const item = todoItems.find(t => t.id === id);
+            if (item) {
+                const newText = prompt("Edit task:", item.text);
+                if (newText && newText.trim() !== "") {
+                    const oldText = item.text;
+                    item.text = newText;
+                    updateTodoList();
+                    saveAllData();
+                    
+                    showNotification(
+                        '✏️ Task Edited',
+                        `Task updated: "${newText}"`,
+                        'edit',
+                        3000
+                    );
+                }
+            }
+        }
+        
+        function removeTodo(id) {
+            const item = todoItems.find(t => t.id === id);
+            if (item && confirm(`Remove "${item.text}" from task list?`)) {
+                const removedText = item.text;
+                todoItems = todoItems.filter(t => t.id !== id);
+                updateTodoList();
+                saveAllData();
+                
+                showNotification(
+                    '🗑️ Task Removed',
+                    `"${removedText}" has been removed.`,
+                    'info',
+                    3000
+                );
+                
+                hasShownAllTasksNotification = false;
+            }
+        }
+        
+        function addTodoItem() {
+            const newTask = prompt("Enter new task:");
+            if (newTask && newTask.trim() !== "") {
+                const newId = todoItems.length > 0 ? Math.max(...todoItems.map(t => t.id)) + 1 : 1;
+                todoItems.push({
+                    id: newId,
+                    text: newTask,
+                    completed: false
+                });
+                updateTodoList();
+                saveAllData();
+                
+                showNotification(
+                    '➕ New Task Added',
+                    `"${newTask}" has been added to your task list.`,
+                    'success',
+                    3000
+                );
+                
+                hasShownAllTasksNotification = false;
+            }
+        }
+        
+        function updateTaskProgress() {
+            const completedCount = todoItems.filter(t => t.completed).length;
+            const totalCount = todoItems.length;
+            const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+            
+            const progressFill = document.getElementById('task-progress-fill');
+            const progressText = document.getElementById('task-progress-text');
+            
+            if (progressFill) {
+                progressFill.style.width = `${percentage}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${completedCount}/${totalCount} (${percentage}%)`;
+                
+                if (percentage === 100) {
+                    progressText.style.color = '#4CAF50';
+                } else if (percentage >= 50) {
+                    progressText.style.color = '#FF9800';
+                } else {
+                    progressText.style.color = '#F44336';
+                }
+            }
+        }
+        
+        function updateTodoList() {
+            const container = document.getElementById('todo-list-container');
+            let html = '';
+            
+            const sortedTasks = [...todoItems].sort((a, b) => {
+                if (a.completed && !b.completed) return 1;
+                if (!a.completed && b.completed) return -1;
+                return 0;
+            });
+            
+            sortedTasks.forEach(item => {
+                html += `
+                    <div class="todo-item" data-id="${item.id}">
+                        <input type="checkbox" class="todo-checkbox" ${item.completed ? 'checked' : ''} onchange="updateTodo(${item.id}, this.checked)">
+                        <span class="todo-text ${item.completed ? 'todo-completed' : ''}">${item.text}</span>
+                        <div class="todo-actions">
+                            <button class="btn btn-edit" onclick="editTodo(${item.id})">Edit</button>
+                            <button class="btn btn-delete" onclick="removeTodo(${item.id})">Remove</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html || '<p style="color: #888; text-align: center;">No tasks yet. Add your first task!</p>';
+            updateTaskProgress();
+        }
+        
+        // ========== PHOTO UPLOAD ==========
+        function handlePhotoUpload(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+            
+            const progressBar = document.getElementById('uploadProgressBar');
+            const progressContainer = document.getElementById('uploadProgress');
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            
+            let uploadedCount = 0;
+            const totalFiles = files.length;
+            
+            Array.from(files).forEach((file, index) => {
+                setTimeout(() => {
+                    const currentProgress = Math.round(((index + 1) / totalFiles) * 100);
+                    progressBar.style.width = `${currentProgress}%`;
+                }, index * 100);
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification(
+                        '⚠️ File Too Large',
+                        `${file.name} is too large (max 5MB). Skipping...`,
+                        'warning',
+                        4000
+                    );
+                    uploadedCount++;
+                    checkAllUploadsComplete();
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedPhotos.unshift({
+                        id: Date.now() + index,
+                        name: file.name,
+                        data: e.target.result,
+                        date: getCurrentDate(),
+                        uploadedBy: currentUser,
+                        size: file.size,
+                        timestamp: Date.now()
+                    });
+                    
+                    uploadedCount++;
+                    checkAllUploadsComplete();
+                };
+                
+                reader.onerror = function() {
+                    showNotification(
+                        '❌ Upload Error',
+                        `Failed to upload ${file.name}`,
+                        'error',
+                        4000
+                    );
+                    uploadedCount++;
+                    checkAllUploadsComplete();
+                };
+                
+                reader.readAsDataURL(file);
+            });
+            
+            function checkAllUploadsComplete() {
+                if (uploadedCount === totalFiles) {
+                    progressBar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        updatePhotoGallery();
+                        updatePhotoCount();
+                        saveAllData();
+                        
+                        showNotification(
+                            '📸 Photos Uploaded!',
+                            `Successfully uploaded ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''}!`,
+                            'photo',
+                            4000
+                        );
+                        
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                            progressBar.style.width = '0%';
+                        }, 1000);
+                        
+                        event.target.value = '';
+                    }, 500);
+                }
+            }
+        }
+        
+        function updatePhotoGallery() {
+            const gallery = document.getElementById('photoGallery');
+            if (!gallery) return;
+            
+            let html = '';
+            
+            uploadedPhotos.forEach(photo => {
+                const timeAgo = getTimeAgo(photo.timestamp);
+                const fileSize = formatFileSize(photo.size);
+                
+                html += `
+                    <div class="photo-item" onclick="previewPhoto('${photo.id}')">
+                        <img src="${photo.data}" alt="${photo.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 fill=%22%234caf50%22 font-size=%2240%22>📷</text></svg>'">
+                        <div class="photo-actions">
+                            <button class="btn btn-view" onclick="event.stopPropagation(); downloadPhoto('${photo.id}')" title="Download">⬇️</button>
+                            <button class="btn btn-delete" onclick="event.stopPropagation(); deletePhoto('${photo.id}')" title="Delete">🗑️</button>
+                        </div>
+                        <div class="photo-info">
+                            <div class="photo-name" title="${photo.name}">${photo.name}</div>
+                            <div class="photo-meta">
+                                <span>${photo.date}</span>
+                                <span>${fileSize}</span>
+                                <span>${timeAgo}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            gallery.innerHTML = html || `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #888;">
+                    <div style="font-size: 50px; margin-bottom: 15px;">📷</div>
+                    <p>No photos uploaded yet</p>
+                    <p style="font-size: 12px; margin-top: 10px;">Upload your first photo by clicking the upload area above!</p>
+                </div>
+            `;
+        }
+        
+        function updatePhotoCount() {
+            const photoCountElement = document.getElementById('photoCount');
+            if (photoCountElement) {
+                photoCountElement.textContent = uploadedPhotos.length;
+            }
+        }
+        
+        function previewPhoto(photoId) {
+            const photo = uploadedPhotos.find(p => p.id == photoId);
+            if (!photo) return;
+            
+            const modal = document.getElementById('photoPreviewModal');
+            const img = modal.querySelector('.photo-preview-img');
+            const info = document.getElementById('photoPreviewInfo');
+            
+            img.src = photo.data;
+            img.alt = photo.name;
+            img.onerror = function() {
+                this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#222"/><text x="50" y="60" text-anchor="middle" fill="#4caf50" font-size="40">📷</text></svg>';
+            };
+            
+            info.innerHTML = `
+                <strong>${photo.name}</strong><br>
+                Uploaded by ${photo.uploadedBy} on ${photo.date}<br>
+                <small>${formatFileSize(photo.size || 0)} • ${getTimeAgo(photo.timestamp)}</small>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+        
+        function closePhotoPreview() {
+            const modal = document.getElementById('photoPreviewModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        function downloadPhoto(photoId) {
+            const photo = uploadedPhotos.find(p => p.id == photoId);
+            if (!photo) return;
+            
+            const link = document.createElement('a');
+            link.href = photo.data;
+            link.download = photo.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification(
+                '⬇️ Photo Downloaded',
+                `${photo.name} has been downloaded.`,
+                'info',
+                3000
+            );
+        }
+        
+        function deletePhoto(photoId) {
+            const photo = uploadedPhotos.find(p => p.id == photoId);
+            if (!photo) return;
+            
+            if (confirm(`Delete "${photo.name}"?`)) {
+                uploadedPhotos = uploadedPhotos.filter(p => p.id !== photoId);
+                updatePhotoGallery();
+                updatePhotoCount();
+                saveAllData();
+                
+                showNotification(
+                    '🗑️ Photo Deleted',
+                    `${photo.name} has been removed from the gallery.`,
+                    'info',
+                    3000
+                );
+            }
+        }
+        
+        // ========== TEAM GRAPH ==========
+        function updateTeamGraph() {
+            const graphContainer = document.getElementById('graphContainer');
+            if (!graphContainer) return;
+            
+            graphContainer.innerHTML = '';
+            
+            teamPerformance.forEach(member => {
+                const memberData = teamMembers.find(m => m.name === member.name);
+                const isOnline = memberData && memberData.status === "online";
+                
+                const barHeight = Math.max(40, Math.min(100, member.productivity || 50));
+                const bar = document.createElement('div');
+                bar.className = 'graph-bar';
+                bar.style.height = `${barHeight}%`;
+                bar.style.background = member.color || '#4caf50';
+                bar.style.opacity = isOnline ? '1' : '0.6';
+                bar.style.transition = 'height 0.5s ease';
+                
+                bar.innerHTML = `
+                    <div class="graph-value">${barHeight}%</div>
+                    <div class="graph-label">${member.name}</div>
+                `;
+                
+                graphContainer.appendChild(bar);
+            });
+        }
+        
+        function showTeamGraph() {
+            if (currentUser === "midhun") {
+                document.getElementById('teamGraph').style.display = 'block';
+                updateTeamGraph();
+            } else {
+                showNotification('⛔ Access Denied', 'Only Founder can view team graph.', 'error', 4000);
+            }
+        }
+        
+        // ========== TEAM MANAGEMENT ==========
+        function updateTeamTable() {
+            const tbody = document.getElementById('team-table');
+            if (!tbody) return;
+            
+            let html = '';
+            
+            teamMembers.forEach(member => {
+                const badgeClass = member.status === "online" ? "badge-success" : "badge-offline";
+                const statusText = member.status === "online" ? "Online" : "Offline";
+                const shortDetails = member.details && member.details.length > 50 ? 
+                    member.details.substring(0, 50) + "..." : 
+                    (member.details || "No details available");
+                
+                // Show Edit and Remove buttons only for founder
+                const showEditRemove = currentUser === 'midhun';
+                
+                html += `
+                    <tr>
+                        <td>${member.name || 'Unknown'}</td>
+                        <td>${member.role || 'Not specified'}</td>
+                        <td>${member.department || 'Not specified'}</td>
+                        <td>${shortDetails}</td>
+                        <td>
+                            <span class="badge ${badgeClass}" onclick="toggleStatus('${member.name}')">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-view" onclick="viewMemberDetails('${member.name}')">View</button>
+                            ${showEditRemove ? `<button class="btn btn-edit" onclick="editTeamMember('${member.name}')">Edit</button>` : ''}
+                            ${showEditRemove ? `<button class="btn btn-remove" onclick="removeTeamMember('${member.name}')">Remove</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center; color: #888;">No team members yet</td></tr>';
+            updateOnlineCount();
+            
+            const totalMembersElement = document.getElementById('total-members');
+            if (totalMembersElement) {
+                totalMembersElement.textContent = teamMembers.length;
+            }
+            
+            const addMemberBtn = document.getElementById('addMemberBtn');
+            if (addMemberBtn) {
+                addMemberBtn.style.display = currentUser === 'midhun' ? 'block' : 'none';
+            }
+        }
+        
+        function login() {
+            const username = document.getElementById('username').value.toLowerCase();
+            const password = document.getElementById('password').value;
+            
+            if (TEAM_USERS[username] && TEAM_USERS[username].password === password) {
+                localStorage.setItem('brokoons_auth', 'true');
+                localStorage.setItem('brokoons_user', username);
+                currentUser = username;
+                
+                showNotification('Login Successful', `Welcome back, ${username}!`, 'success', 3000);
+                showMainSystem();
+                
+                const teamMember = teamMembers.find(member => 
+                    member.name.toLowerCase().includes(username)
+                );
+                if (teamMember) {
+                    teamMember.status = "online";
+                    teamMember.lastOnline = Date.now();
+                    saveAllData();
+                }
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+        
+        function logout() {
+            if (currentUser) {
+                const teamMember = teamMembers.find(member => 
+                    member.name.toLowerCase().includes(currentUser)
+                );
+                if (teamMember) {
+                    teamMember.status = "offline";
+                    teamMember.lastOnline = null;
+                }
+            }
+            
+            localStorage.removeItem('brokoons_auth');
+            localStorage.removeItem('brokoons_user');
+            currentUser = null;
+            
+            showNotification('Logged Out', 'You have been successfully logged out.', 'info', 3000);
+            showLoginScreen();
+        }
+        
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+        
+        function showMainSystem() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('currentUser').textContent = currentUser;
+            initializeDashboard();
+        }
+        
+        function showTab(tabName) {
+            currentTab = tabName;
+            localStorage.setItem('brokoons_last_tab', tabName);
+            
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const selectedTab = document.getElementById(`${tabName}-tab`);
+            selectedTab.classList.add('active');
+            selectedTab.style.display = 'block';
+            
+            event.currentTarget.classList.add('active');
+            
+            if (tabName === 'dashboard') {
+                updateStockTable();
+                updateOnlineCount();
+            } else if (tabName === 'stock') {
+                updateInventoryTable();
+            } else if (tabName === 'progress') {
+                updateTodoList();
+                updateFarmSchedule();
+                updateProgressLog();
+                updateQualityDisplay();
+                updatePhotoGallery();
+                updateTaskProgress();
+                updatePhotoCount();
+            } else if (tabName === 'team') {
+                updateTeamTable();
+                updateTeamGraph();
+            }
+        }
+        
+        function initializeDashboard() {
+            updateStockTable();
+            updateInventoryTable();
+            updateTeamTable();
+            updateTodoList();
+            updateFarmSchedule();
+            updateProgressLog();
+            updateQualityDisplay();
+            updatePhotoGallery();
+            updateTaskProgress();
+            updatePhotoCount();
+            updateTeamGraph();
+            
+            const savedTab = localStorage.getItem('brokoons_last_tab');
+            showTab(savedTab || 'progress');
+            
+            const searchInput = document.getElementById('search-stock');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('#inventory-table tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+            
+            document.getElementById('current-date').textContent = `Today's Date: ${getCurrentDate()}`;
+            
+            document.getElementById('size-input').value = qualityMetrics.sizeRaw || 0;
+            document.getElementById('color-input').value = qualityMetrics.colorRaw || 0;
+            document.getElementById('growth-input').value = qualityMetrics.growthRaw || 0;
+            document.getElementById('yield-input').value = qualityMetrics.yieldRaw || 0;
+            document.getElementById('harvest-input').value = qualityMetrics.harvest || 0;
+            
+            calculateQuality();
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            showLoginScreen();
+            loadAllData();
+            
+            if (localStorage.getItem('brokoons_auth') === 'true') {
+                const savedUser = localStorage.getItem('brokoons_user');
+                if (savedUser && TEAM_USERS[savedUser]) {
+                    currentUser = savedUser;
+                    showMainSystem();
+                }
+            }
+        });
+        
+        function updateOnlineCount() {
+            const onlineCount = teamMembers.filter(member => member.status === "online").length;
+            document.getElementById('online-count').textContent = onlineCount;
+        }
+        
+        function updateStockTable() {
+            const tbody = document.getElementById('stock-table-body');
+            let html = '';
+            let totalStock = 0;
+            
+            stockItems.slice(0, 5).forEach(item => {
+                totalStock += item.quantity;
+                const badgeClass = item.status === "In Stock" ? "badge-success" : 
+                                  item.status === "Low Stock" ? "badge-warning" : "badge-danger";
+                
+                html += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.quantity}</td>
+                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                        <td>${item.lastUpdated}</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editItem('${item.name}')">Edit</button>
+                            <button class="btn btn-delete" onclick="deleteItem('${item.name}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; color: #888;">No stock items yet</td></tr>';
+            document.getElementById('stock-total').textContent = totalStock;
+        }
+        
+        function updateInventoryTable() {
+            const tbody = document.getElementById('inventory-table');
+            let html = '';
+            let lowStockCount = 0;
+            
+            stockItems.forEach(item => {
+                if (item.status === "Low Stock") lowStockCount++;
+                const badgeClass = item.status === "In Stock" ? "badge-success" : 
+                                  item.status === "Low Stock" ? "badge-warning" : "badge-danger";
+                
+                html += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.category}</td>
+                        <td>${item.quantity}</td>
+                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editItem('${item.name}')">Edit</button>
+                            <button class="btn btn-rename" onclick="renameItem('${item.name}')">Rename</button>
+                            <button class="btn btn-delete" onclick="deleteItem('${item.name}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; color: #888;">No inventory items yet</td></tr>';
+            document.getElementById('low-stock-count').textContent = `${lowStockCount} item${lowStockCount !== 1 ? 's' : ''} need${lowStockCount === 1 ? 's' : ''} attention`;
+        }
+        
+        function addStockItem() {
+            const name = prompt("Enter item name:");
+            if (name) {
+                const category = prompt("Enter category (Packaging/Supplies/Raw Materials/Equipment):");
+                const quantity = parseInt(prompt("Enter quantity:"));
+                
+                if (name && category && quantity) {
+                    const status = quantity > 30 ? "In Stock" : quantity > 10 ? "Low Stock" : "Out of Stock";
+                    stockItems.unshift({ 
+                        name, 
+                        category, 
+                        quantity, 
+                        status, 
+                        lastUpdated: "Just now" 
+                    });
+                    updateStockTable();
+                    updateInventoryTable();
+                    saveAllData();
+                    
+                    if (status === "Low Stock") {
+                        showNotification('⚠️ Low Stock Item Added', `${name} has been added with low stock (${quantity} remaining).`, 'warning', 5000);
+                    } else {
+                        showNotification('✅ Item Added', `${name} has been added to inventory.`, 'success', 3000);
+                    }
+                }
+            }
+        }
+        
+        function editItem(itemName) {
+            const item = stockItems.find(i => i.name === itemName);
+            if (item) {
+                const newQty = parseInt(prompt(`Edit quantity for ${itemName}:`, item.quantity));
+                if (newQty !== null && !isNaN(newQty)) {
+                    item.quantity = newQty;
+                    item.status = newQty > 30 ? "In Stock" : newQty > 10 ? "Low Stock" : "Out of Stock";
+                    item.lastUpdated = "Just now";
+                    updateStockTable();
+                    updateInventoryTable();
+                    saveAllData();
+                    
+                    showNotification('✅ Item Updated', `${itemName} quantity updated to ${newQty}.`, 'success', 3000);
+                }
+            }
+        }
+        
+        function renameItem(itemName) {
+            const item = stockItems.find(i => i.name === itemName);
+            if (item) {
+                const newName = prompt(`Rename "${itemName}" to:`, item.name);
+                if (newName && newName.trim() !== "") {
+                    item.name = newName;
+                    item.lastUpdated = "Just now";
+                    updateStockTable();
+                    updateInventoryTable();
+                    saveAllData();
+                    
+                    showNotification('✅ Item Renamed', `Item renamed to "${newName}".`, 'success', 3000);
+                }
+            }
+        }
+        
+        function deleteItem(itemName) {
+            if (confirm(`Delete "${itemName}" from inventory?`)) {
+                stockItems = stockItems.filter(i => i.name !== itemName);
+                updateStockTable();
+                updateInventoryTable();
+                saveAllData();
+                
+                showNotification('🗑️ Item Deleted', `${itemName} has been removed from inventory.`, 'info', 3000);
+            }
+        }
+        
+        function showLowStock() {
+            const lowStockItems = stockItems.filter(item => item.status === "Low Stock");
+            if (lowStockItems.length > 0) {
+                let message = "Low Stock Items:\n\n";
+                lowStockItems.forEach(item => {
+                    message += `• ${item.name}: ${item.quantity} remaining\n`;
+                });
+                alert(message);
+            } else {
+                alert("No low stock items!");
+            }
+        }
+        
+        function exportData() {
+            alert("Exporting data...");
+            showNotification('📊 Export Started', 'Data export process has started.', 'info', 3000);
+        }
+        
+        // ========== IMPORTANT CHANGE: STATUS TOGGLE PERMISSIONS ==========
+        function toggleStatus(memberName) {
+            const member = teamMembers.find(m => m.name === memberName);
+            if (!member) return;
+            
+            // Founder can toggle anyone's status
+            if (currentUser === 'midhun') {
+                const wasOnline = member.status === "online";
+                member.status = wasOnline ? "offline" : "online";
+                if (member.status === "online") {
+                    member.lastOnline = Date.now();
+                    showNotification('👤 Member Online', `${memberName} is now online.`, 'success', 3000);
+                } else {
+                    member.lastOnline = null;
+                    showNotification('👤 Member Offline', `${memberName} is now offline.`, 'info', 3000);
+                }
+                updateTeamTable();
+                updateTeamGraph();
+                saveAllData();
+            } 
+            // Other users can only toggle their own status
+            else {
+                // Check if this is the current user's own account
+                const userTeamMember = teamMembers.find(m => 
+                    m.name.toLowerCase().includes(currentUser)
+                );
+                
+                if (userTeamMember && userTeamMember.name === memberName) {
+                    const wasOnline = member.status === "online";
+                    member.status = wasOnline ? "offline" : "online";
+                    if (member.status === "online") {
+                        member.lastOnline = Date.now();
+                        showNotification('👤 Status Changed', 'You are now online.', 'success', 3000);
+                    } else {
+                        member.lastOnline = null;
+                        showNotification('👤 Status Changed', 'You are now offline.', 'info', 3000);
+                    }
+                    updateTeamTable();
+                    updateTeamGraph();
+                    saveAllData();
+                } else {
+                    showNotification('⛔ Access Denied', 'You can only change your own status.', 'error', 4000);
+                }
+            }
+        }
+        
+        function editTeamMember(memberName) {
+            if (currentUser !== 'midhun') {
+                showNotification('⛔ Access Denied', 'Only Founder can edit team members.', 'error', 4000);
+                return;
+            }
+            
+            const member = teamMembers.find(m => m.name === memberName);
+            if (member) {
+                const newRole = prompt(`Edit role for ${memberName}:`, member.role);
+                if (newRole) {
+                    const newDepartment = prompt(`Edit department for ${memberName}:`, member.department);
+                    const newDetails = prompt(`Edit details for ${memberName}:`, member.details);
+                    const newPerformance = prompt(`Edit performance for ${memberName} (0-100%):`, member.performance);
+                    
+                    if (newRole && newDepartment && newDetails && newPerformance) {
+                        member.role = newRole;
+                        member.department = newDepartment;
+                        member.details = newDetails;
+                        member.performance = newPerformance;
+                        updateTeamTable();
+                        saveAllData();
+                        
+                        showNotification('✅ Team Member Updated', `${memberName}'s details have been updated.`, 'success', 3000);
+                    }
+                }
+            }
+        }
+        
+        function removeTeamMember(memberName) {
+            if (currentUser !== 'midhun') {
+                showNotification('⛔ Access Denied', 'Only Founder can remove team members.', 'error', 4000);
+                return;
+            }
+            
+            if (confirm(`Remove "${memberName}" from team?`)) {
+                teamMembers = teamMembers.filter(m => m.name !== memberName);
+                updateTeamTable();
+                saveAllData();
+                
+                showNotification('👤 Team Member Removed', `${memberName} has been removed from the team.`, 'info', 3000);
+            }
+        }
+        
+        function addTeamMember() {
+            if (currentUser !== 'midhun') {
+                showNotification('⛔ Access Denied', 'Only Founder can add team members.', 'error', 4000);
+                return;
+            }
+            
+            const name = prompt("Enter team member name:");
+            const role = prompt("Enter role:");
+            const department = prompt("Enter department:");
+            const details = prompt("Enter details (responsibilities, experience, etc.):");
+            const performance = prompt("Enter performance (0-100%):", "85%");
+            const joinedDate = prompt("Enter joined date (DD/MM/YYYY):", getCurrentDate());
+            
+            if (name && role && department && details && performance && joinedDate) {
+                teamMembers.push({
+                    name,
+                    role,
+                    department,
+                    details,
+                    performance,
+                    joinedDate,
+                    status: "offline",
+                    lastOnline: null,
+                    photo: null
+                });
+                
+                teamPerformance.push({
+                    name: name,
+                    productivity: parseInt(performance),
+                    attendance: 85,
+                    quality: 80,
+                    color: getRandomColor()
+                });
+                
+                updateTeamTable();
+                updateTeamGraph();
+                saveAllData();
+                
+                showNotification('👤 Team Member Added', `${name} has been added to the team.`, 'success', 3000);
+            }
+        }
+        
+        function getRandomColor() {
+            const colors = ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#00BCD4', '#FF5722', '#795548', '#607D8B'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        function viewMemberDetails(memberName) {
+            const member = teamMembers.find(m => m.name === memberName);
+            if (!member) return;
+            
+            currentViewingMember = member;
+            
+            document.getElementById('modalMemberName').textContent = member.name;
+            document.getElementById('modalMemberRole').textContent = member.role;
+            document.getElementById('modalMemberDepartment').textContent = member.department;
+            document.getElementById('modalMemberStatus').textContent = member.status === "online" ? "🟢 Online" : "⚫ Offline";
+            document.getElementById('modalMemberJoined').textContent = member.joinedDate || "Not specified";
+            document.getElementById('modalMemberPerformance').textContent = member.performance || "Not rated";
+            document.getElementById('modalMemberDetails').textContent = member.details || "No additional details available.";
+            
+            const photoElement = document.getElementById('modalMemberPhoto');
+            if (member.photo) {
+                photoElement.src = member.photo;
+            } else {
+                const initials = member.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                photoElement.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#222"/><text x="50" y="60" text-anchor="middle" fill="#4caf50" font-size="40">${initials}</text></svg>`;
+            }
+            
+            const uploadBtn = document.getElementById('uploadPhotoBtn');
+            uploadBtn.style.display = currentUser === 'midhun' ? 'block' : 'none';
+            
+            document.getElementById('memberModal').style.display = 'flex';
+        }
+        
+        function closeMemberModal() {
+            document.getElementById('memberModal').style.display = 'none';
+            currentViewingMember = null;
+        }
+        
+        function uploadMemberPhoto(event) {
+            if (!currentViewingMember || currentUser !== 'midhun') return;
+            
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`File is too large (max 5MB)`);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentViewingMember.photo = e.target.result;
+                
+                document.getElementById('modalMemberPhoto').src = e.target.result;
+                
+                updateTeamTable();
+                saveAllData();
+                
+                showNotification('📸 Photo Uploaded', `${currentViewingMember.name}'s photo has been updated.`, 'success', 3000);
+            };
+            reader.readAsDataURL(file);
+            
+            event.target.value = '';
+        }
+        
+        function showPerformance() {
+            let message = "Team Performance:\n\n";
+            teamPerformance.forEach(member => {
+                const memberData = teamMembers.find(m => m.name === member.name);
+                const status = memberData ? memberData.status : 'offline';
+                message += `• ${member.name}: ${member.productivity || 0}% productivity (${status})\n`;
+            });
+            alert(message);
+        }
+        
+        function updateFarmSchedule() {
+            const container = document.getElementById('farm-schedule-grid');
+            let html = '';
+            
+            farmSchedule.forEach(day => {
+                html += `
+                    <div class="schedule-day">
+                        <h4>${day.day}</h4>
+                        ${day.tasks.map(task => `<p>• ${task}</p>`).join('')}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function editFarmSchedule() {
+            const day = prompt("Enter day to edit (Monday-Friday):");
+            if (day) {
+                const scheduleDay = farmSchedule.find(d => d.day.toLowerCase() === day.toLowerCase());
+                if (scheduleDay) {
+                    const newTasks = prompt(`Edit tasks for ${day} (separate with commas):`, scheduleDay.tasks.join(', '));
+                    if (newTasks) {
+                        scheduleDay.tasks = newTasks.split(',').map(t => t.trim()).filter(t => t !== '');
+                        updateFarmSchedule();
+                        saveAllData();
+                        
+                        showNotification('📅 Schedule Updated', `${day}'s schedule has been updated.`, 'success', 3000);
+                    }
+                } else {
+                    alert("Day not found in schedule");
+                }
+            }
+        }
+        
+        function showFarmSchedule() {
+            let message = "Farm Schedule:\n\n";
+            farmSchedule.forEach(day => {
+                message += `${day.day}:\n`;
+                day.tasks.forEach(task => {
+                    message += `  • ${task}\n`;
+                });
+                message += '\n';
+            });
+            alert(message);
+        }
+        
+        function updateProgressLog() {
+            const tbody = document.querySelector('#progress-log-table tbody');
+            let html = '';
+            
+            progressLogs.forEach(log => {
+                const qualityScore = parseInt(log.quality);
+                const badgeClass = qualityScore >= 90 ? "badge-success" : 
+                                 qualityScore >= 80 ? "badge-warning" : "badge-danger";
+                
+                html += `
+                    <tr>
+                        <td>${log.date}</td>
+                        <td>${log.batches}</td>
+                        <td style="color: #4caf50;">${log.growth}</td>
+                        <td>${log.yield}</td>
+                        <td><span class="badge ${badgeClass}">${log.quality}</span></td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editProgressLog('${log.date}')">Edit</button>
+                            <button class="btn btn-delete" onclick="deleteProgressLog('${log.date}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center; color: #888;">No progress logs yet</td></tr>';
+        }
+        
+        function editProgressLog(date) {
+            const log = progressLogs.find(l => l.date === date);
+            if (log) {
+                const newGrowth = prompt(`Edit growth for ${date}:`, log.growth);
+                const newYield = prompt(`Edit yield for ${date}:`, log.yield);
+                const newQuality = prompt(`Edit quality for ${date}:`, log.quality);
+                
+                if (newGrowth && newYield && newQuality) {
+                    log.growth = newGrowth;
+                    log.yield = newYield;
+                    log.quality = newQuality;
+                    updateProgressLog();
+                    saveAllData();
+                    
+                    showNotification('📝 Log Updated', `Progress log for ${date} has been updated.`, 'success', 3000);
+                }
+            }
+        }
+        
+        function deleteProgressLog(date) {
+            if (confirm(`Delete progress log for ${date}?`)) {
+                progressLogs = progressLogs.filter(l => l.date !== date);
+                updateProgressLog();
+                saveAllData();
+                
+                showNotification('🗑️ Log Deleted', `Progress log for ${date} has been deleted.`, 'info', 3000);
+            }
+        }
+        
+        function addProgressLog() {
+            const date = prompt("Enter date:", getCurrentDate());
+            const batches = prompt("Enter number of batches:", "0");
+            const growth = prompt("Enter growth rate:", "0%");
+            const yield = prompt("Enter yield percentage:", "0%");
+            const quality = prompt("Enter quality score:", "0/100");
+            
+            if (date && batches && growth && yield && quality) {
+                progressLogs.unshift({
+                    date,
+                    batches: parseInt(batches),
+                    growth,
+                    yield,
+                    quality
+                });
+                updateProgressLog();
+                saveAllData();
+                
+                showNotification('📊 Progress Log Added', 'New progress log has been added.', 'success', 3000);
+            }
+        }
+        
+        function calculateQuality() {
+            const sizeRaw = parseFloat(document.getElementById('size-input').value) || 0;
+            const colorRaw = parseFloat(document.getElementById('color-input').value) || 0;
+            const growthRaw = parseFloat(document.getElementById('growth-input').value) || 0;
+            const yieldRaw = parseFloat(document.getElementById('yield-input').value) || 0;
+            const harvest = parseFloat(document.getElementById('harvest-input').value) || 0;
+            
+            const sizePercent = Math.min(100, Math.round((sizeRaw / 30) * 100));
+            const colorPercent = Math.min(100, Math.round((colorRaw / 10) * 100));
+            const growthPercent = Math.min(100, Math.round(growthRaw));
+            const yieldPercent = Math.min(100, Math.round((yieldRaw / 20) * 100));
+            
+            document.getElementById('size-display').textContent = `${sizePercent}/100`;
+            document.getElementById('color-display').textContent = `${colorPercent}/100`;
+            document.getElementById('growth-display').textContent = `${growthPercent}/100`;
+            document.getElementById('yield-display').textContent = `${yieldPercent}/100`;
+            document.getElementById('harvest-display').textContent = `${harvest} bags`;
+            
+            const overall = Math.round((sizePercent + colorPercent + growthPercent + yieldPercent) / 4);
+            
+            document.getElementById('quality-bar').style.width = `${overall}%`;
+            document.getElementById('quality-percentage').textContent = `${overall}%`;
+            document.getElementById('main-quality-score').textContent = `${overall}/100`;
+            document.getElementById('quality-score-value').textContent = `${overall}/100`;
+            
+            qualityMetrics.sizeRaw = sizeRaw;
+            qualityMetrics.colorRaw = colorRaw;
+            qualityMetrics.growthRaw = growthRaw;
+            qualityMetrics.yieldRaw = yieldRaw;
+            qualityMetrics.harvest = harvest;
+            
+            qualityMetrics.size = sizePercent;
+            qualityMetrics.color = colorPercent;
+            qualityMetrics.growth = growthPercent;
+            qualityMetrics.yield = yieldPercent;
+            qualityMetrics.overall = overall;
+        }
+        
+        function saveQualityMetrics() {
+            calculateQuality();
+            qualityMetrics.lastUpdated = getCurrentDate();
+            saveAllData();
+            
+            showNotification('⭐ Quality Metrics Saved', 'Your quality metrics have been saved successfully!', 'success', 3000);
+        }
+        
+        function updateQualityDisplay() {
+            document.getElementById('current-date').textContent = `Today's Date: ${getCurrentDate()}`;
+            
+            document.getElementById('quality-bar').style.width = `${qualityMetrics.overall || 0}%`;
+            document.getElementById('quality-percentage').textContent = `${qualityMetrics.overall || 0}%`;
+            document.getElementById('main-quality-score').textContent = `${qualityMetrics.overall || 0}/100`;
+            document.getElementById('quality-score-value').textContent = `${qualityMetrics.overall || 0}/100`;
+        }
+        
+        function showDailyReport() {
+            const completedCount = todoItems.filter(t => t.completed).length;
+            const totalCount = todoItems.length;
+            const harvest = qualityMetrics.harvest || 0;
+            
+            alert(`📅 Daily Report (${getCurrentDate()})\n\n• Tasks Completed: ${completedCount}/${totalCount}\n• Quality Score: ${qualityMetrics.overall || 0}/100\n• Growth Rate: ${qualityMetrics.growthRaw || 0}%\n• Harvested: ${harvest} bags\n\nCompleted Tasks:\n${todoItems.filter(t => t.completed).map(t => `✓ ${t.text}`).join('\n') || 'No tasks completed yet'}`);
+        }
+        
+        function showQualityMetrics() {
+            alert(`⭐ Quality Metrics (${getCurrentDate()})\n\n• Overall: ${qualityMetrics.overall || 0}/100\n• Size: ${qualityMetrics.size || 0}/100 (${qualityMetrics.sizeRaw || 0} cm)\n• Color: ${qualityMetrics.color || 0}/100 (${qualityMetrics.colorRaw || 0}/10)\n• Growth: ${qualityMetrics.growth || 0}/100 (${qualityMetrics.growthRaw || 0}%)\n• Yield: ${qualityMetrics.yield || 0}/100 (${qualityMetrics.yieldRaw || 0} kg)`);
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('memberModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeMemberModal();
+            }
+        });
+        
+        document.getElementById('photoPreviewModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePhotoPreview();
+            }
+        });
+    </script>
+</body>
+</html>
