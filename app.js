@@ -2,12 +2,13 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 // ========== SUPABASE CONFIGURATION ==========
-// REPLACE THESE WITH YOUR ACTUAL VALUES
-const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';  // Get from Supabase Settings > API
-const SUPABASE_KEY = 'YOUR_ANON_KEY';  // Get from Supabase Settings > API
+// REPLACE THESE WITH YOUR ACTUAL VALUES FROM SUPABASE
+const SUPABASE_URL = 'https://dmrghgbbsvqlqmzuvbpb.supabase.co';  // Your Supabase URL
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtcmdoZ2Jic3ZxbHFtenV2YnBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyNDUxNTgsImV4cCI6MjA1MTgyMTE1OH0.PGih7eEJ-Vf9XY47Ck9Moi3pSWerM6d61_JSPxImsIw';  // Your anon/public key
 
 // Initialize Supabase
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+console.log('✅ Supabase initialized with URL:', SUPABASE_URL);
 
 // ========== GLOBAL VARIABLES ==========
 const TEAM_USERS = {
@@ -48,8 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Test Supabase connection
-    testSupabaseConnection();
+    // Test Supabase connection on startup
+    setTimeout(testSupabaseConnection, 1000);
 });
 
 // ========== SUPABASE FUNCTIONS ==========
@@ -67,10 +68,18 @@ async function testSupabaseConnection() {
             .select('*', { count: 'exact', head: true });
         console.log('Database connection test:', count, 'records found');
         
-        if (bucketError) console.error('Storage error:', bucketError);
-        if (dbError) console.error('Database error:', dbError);
+        if (bucketError) {
+            console.error('Storage error:', bucketError);
+            showNotification('⚠️ Storage Error', bucketError.message, 'warning', 5000);
+        }
+        if (dbError) {
+            console.error('Database error:', dbError);
+            showNotification('⚠️ Database Error', dbError.message, 'warning', 5000);
+        }
         
-        showNotification('✅ Supabase Connected', 'Storage and database are ready for uploads.', 'success', 3000);
+        if (!bucketError && !dbError) {
+            showNotification('✅ Supabase Connected', 'Storage and database are ready for uploads.', 'success', 3000);
+        }
         
     } catch (error) {
         console.error('Supabase connection failed:', error);
@@ -81,6 +90,11 @@ async function testSupabaseConnection() {
 async function uploadPhotoToSupabase(file) {
     try {
         console.log('Starting Supabase upload for:', file.name);
+        
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            throw new Error('File size exceeds 5MB limit');
+        }
         
         // Generate unique filename
         const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
@@ -113,6 +127,7 @@ async function uploadPhotoToSupabase(file) {
                 {
                     image_url: publicUrl,
                     file_name: fileName,
+                    original_name: file.name,
                     file_path: filePath,
                     uploaded_at: new Date().toISOString(),
                     file_size: file.size,
@@ -142,13 +157,12 @@ async function uploadPhotoToSupabase(file) {
                 supabase_url: publicUrl,
                 supabase_path: filePath
             });
-            updatePhotoGallery();
             saveAllData();
         };
         reader.readAsDataURL(file);
         
         showNotification('✅ Upload Successful', `${file.name} uploaded to Supabase!`, 'success', 4000);
-        return { success: true, url: publicUrl, fileName: fileName };
+        return { success: true, url: publicUrl, fileName: fileName, filePath: filePath };
         
     } catch (error) {
         console.error('Upload failed:', error);
@@ -227,12 +241,6 @@ async function handlePhotoUpload(event) {
         const currentProgress = Math.round(((i + 1) / totalFiles) * 100);
         progressBar.style.width = `${currentProgress}%`;
         
-        if (file.size > 5 * 1024 * 1024) {
-            showNotification('⚠️ File Too Large', `${file.name} is too large (max 5MB). Skipping...`, 'warning', 4000);
-            uploadedCount++;
-            continue;
-        }
-        
         // Upload to Supabase
         const result = await uploadPhotoToSupabase(file);
         if (result.success) {
@@ -247,6 +255,8 @@ async function handlePhotoUpload(event) {
     progressBar.style.width = '100%';
     
     setTimeout(() => {
+        // Reload images from Supabase
+        loadSupabaseImages();
         updatePhotoCount();
         
         showNotification(
@@ -280,6 +290,7 @@ async function loadSupabaseImages() {
                 <p style="font-size: 12px; margin-top: 10px;">Upload your first photo to Supabase!</p>
             </div>
         `;
+        updatePhotoCount();
         return;
     }
     
@@ -287,20 +298,22 @@ async function loadSupabaseImages() {
     images.forEach(photo => {
         const timeAgo = getTimeAgo(new Date(photo.uploaded_at).getTime());
         const fileSize = formatFileSize(photo.file_size);
+        const displayName = photo.original_name || photo.file_name;
         
         html += `
-            <div class="photo-item" onclick="previewSupabasePhoto('${photo.image_url}', '${photo.file_name}')">
-                <img src="${photo.image_url}" alt="${photo.file_name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 fill=%22%234caf50%22 font-size=%2240%22>📷</text></svg>'">
+            <div class="photo-item" onclick="previewSupabasePhoto('${photo.image_url}', '${displayName}')">
+                <img src="${photo.image_url}" alt="${displayName}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 fill=%22%234caf50%22 font-size=%2240%22>📷</text></svg>'">
                 <div class="photo-actions">
-                    <button class="btn btn-view" onclick="event.stopPropagation(); downloadFromUrl('${photo.image_url}', '${photo.file_name}')" title="Download">⬇️</button>
+                    <button class="btn btn-view" onclick="event.stopPropagation(); downloadFromUrl('${photo.image_url}', '${displayName}')" title="Download">⬇️</button>
                     <button class="btn btn-delete" onclick="event.stopPropagation(); deleteSupabasePhoto('${photo.id}', '${photo.file_path}')" title="Delete">🗑️</button>
                 </div>
                 <div class="photo-info">
-                    <div class="photo-name" title="${photo.file_name}">${photo.file_name}</div>
+                    <div class="photo-name" title="${displayName}">${displayName}</div>
                     <div class="photo-meta">
                         <span>${new Date(photo.uploaded_at).toLocaleDateString()}</span>
                         <span>${fileSize}</span>
                         <span>${timeAgo}</span>
+                        <span>by ${photo.uploaded_by || 'unknown'}</span>
                     </div>
                 </div>
             </div>
@@ -318,10 +331,13 @@ function previewSupabasePhoto(url, fileName) {
     
     img.src = url;
     img.alt = fileName;
+    img.onerror = function() {
+        this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#222"/><text x="50" y="60" text-anchor="middle" fill="#4caf50" font-size="40">📷</text></svg>';
+    };
     
     info.innerHTML = `
         <strong>${fileName}</strong><br>
-        <small>Loaded from Supabase</small>
+        <small>Loaded from Supabase Storage</small>
     `;
     
     modal.style.display = 'flex';
@@ -350,9 +366,7 @@ function downloadFromUrl(url, fileName) {
     showNotification('⬇️ Photo Downloaded', `${fileName} has been downloaded.`, 'info', 3000);
 }
 
-// ========== ALL YOUR EXISTING FUNCTIONS (keep them exactly as before) ==========
-// Just update the photo-related functions to use the Supabase versions
-
+// ========== EXISTING DASHBOARD FUNCTIONS ==========
 function login() {
     const username = document.getElementById('username').value.toLowerCase();
     const password = document.getElementById('password').value;
@@ -454,6 +468,43 @@ function showTab(tabName) {
     }
 }
 
+function initializeDashboard() {
+    updateStockTable();
+    updateInventoryTable();
+    updateTeamTable();
+    updateTodoList();
+    updateFarmSchedule();
+    updateProgressLog();
+    updateQualityDisplay();
+    updateTaskProgress();
+    
+    const savedTab = localStorage.getItem('brokoons_last_tab');
+    showTab(savedTab || 'progress');
+    
+    const searchInput = document.getElementById('search-stock');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#inventory-table tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+    
+    document.getElementById('current-date').textContent = `Today's Date: ${getCurrentDate()}`;
+    
+    document.getElementById('size-input').value = qualityMetrics.sizeRaw || 0;
+    document.getElementById('color-input').value = qualityMetrics.colorRaw || 0;
+    document.getElementById('growth-input').value = qualityMetrics.growthRaw || 0;
+    document.getElementById('yield-input').value = qualityMetrics.yieldRaw || 0;
+    document.getElementById('harvest-input').value = qualityMetrics.harvest || 0;
+    
+    calculateQuality();
+}
+
 // ========== UTILITY FUNCTIONS ==========
 function getCurrentDate() {
     const now = new Date();
@@ -533,6 +584,153 @@ function removeNotification(id) {
     }
 }
 
+// ========== DATA LOAD/SAVE FUNCTIONS ==========
+function loadAllData() {
+    const savedTeam = localStorage.getItem('brokoons_team_members');
+    if (savedTeam) {
+        teamMembers = JSON.parse(savedTeam);
+    } else {
+        teamMembers = [
+            { 
+                name: "Midhun", 
+                role: "Founder", 
+                department: "Management", 
+                details: "Overall management and strategy planning. 5+ years experience in mushroom farming.", 
+                status: "online", 
+                lastOnline: Date.now(),
+                joinedDate: "01/01/2025",
+                performance: "95%",
+                photo: null
+            },
+            { 
+                name: "Akash", 
+                role: "Co-Founder", 
+                department: "Operations", 
+                details: "Handles day-to-day operations and farm management. Expert in organic farming techniques.", 
+                status: "online", 
+                lastOnline: Date.now(),
+                joinedDate: "02/01/2025",
+                performance: "92%",
+                photo: null
+            },
+            { 
+                name: "Mohammad Sajad", 
+                role: "Marketing Head", 
+                department: "Marketing", 
+                details: "Marketing and sales strategy. Manages client relationships and market research.", 
+                status: "online", 
+                lastOnline: Date.now(),
+                joinedDate: "20/01/2025",
+                performance: "90%",
+                photo: null
+            },
+            { 
+                name: "Saran Kumar", 
+                role: "Accountant", 
+                department: "Finance", 
+                details: "Financial management, budgeting, and accounts. Ensures financial compliance.", 
+                status: "offline", 
+                lastOnline: null,
+                joinedDate: "5/02/2025",
+                performance: "89%",
+                photo: null
+            },
+            { 
+                name: "Muhammad N", 
+                role: "Social Media", 
+                department: "Marketing", 
+                details: "Social media management and digital presence. Creates content and engages with audience.", 
+                status: "offline", 
+                lastOnline: null,
+                joinedDate: "06/02/2025",
+                performance: "70%",
+                photo: null
+            }
+        ];
+    }
+    
+    // Load other data
+    const savedStock = localStorage.getItem('brokoons_stock_items');
+    stockItems = savedStock ? JSON.parse(savedStock) : [];
+    
+    const savedLogs = localStorage.getItem('brokoons_progress_logs');
+    progressLogs = savedLogs ? JSON.parse(savedLogs) : [];
+    
+    const savedMetrics = localStorage.getItem('brokoons_quality_metrics');
+    qualityMetrics = savedMetrics ? JSON.parse(savedMetrics) : {
+        overall: 0,
+        size: 0,
+        color: 0,
+        growth: 0,
+        yield: 0,
+        harvest: 0,
+        lastUpdated: getCurrentDate()
+    };
+    
+    const savedSchedule = localStorage.getItem('brokoons_farm_schedule');
+    farmSchedule = savedSchedule ? JSON.parse(savedSchedule) : [
+        { day: "Monday", tasks: ["Watering", "Temperature check", "Harvesting"] },
+        { day: "Tuesday", tasks: ["Spore collection", "Cleaning", "Data recording"] },
+        { day: "Wednesday", tasks: ["Watering", "Pest check", "Harvesting"] },
+        { day: "Thursday", tasks: ["New batch setup", "Quality check"] },
+        { day: "Friday", tasks: ["Watering", "Harvesting", "Weekly report"] }
+    ];
+    
+    const savedTodos = localStorage.getItem('brokoons_todo_items');
+    if (savedTodos) {
+        todoItems = JSON.parse(savedTodos);
+    } else {
+        todoItems = [
+            { id: 1, text: "Check mushroom growth progress", completed: false },
+            { id: 2, text: "Record temperature and humidity", completed: false },
+            { id: 3, text: "Water mushroom beds", completed: false },
+            { id: 4, text: "Harvest mature mushrooms", completed: false },
+            { id: 5, text: "Clean and sterilize equipment", completed: false }
+        ];
+    }
+    
+    const savedPhotos = localStorage.getItem('brokoons_photos');
+    uploadedPhotos = savedPhotos ? JSON.parse(savedPhotos) : [];
+    
+    const savedPerformance = localStorage.getItem('brokoons_team_performance');
+    if (savedPerformance) {
+        teamPerformance = JSON.parse(savedPerformance);
+    } else {
+        teamPerformance = [
+            { name: "Midhun", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#4CAF50" },
+            { name: "Akash", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#2196F3" },
+            { name: "Sajad", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#FF9800" },
+            { name: "Saran", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#9C27B0" },
+            { name: "Muhammad", productivity: getRandomScore(), attendance: getRandomScore(), quality: getRandomScore(), color: "#00BCD4" }
+        ];
+    }
+}
+
+function saveAllData() {
+    localStorage.setItem('brokoons_team_members', JSON.stringify(teamMembers));
+    localStorage.setItem('brokoons_stock_items', JSON.stringify(stockItems));
+    localStorage.setItem('brokoons_progress_logs', JSON.stringify(progressLogs));
+    localStorage.setItem('brokoons_quality_metrics', JSON.stringify(qualityMetrics));
+    localStorage.setItem('brokoons_farm_schedule', JSON.stringify(farmSchedule));
+    localStorage.setItem('brokoons_todo_items', JSON.stringify(todoItems));
+    localStorage.setItem('brokoons_photos', JSON.stringify(uploadedPhotos));
+    localStorage.setItem('brokoons_team_performance', JSON.stringify(teamPerformance));
+}
+
+function getRandomScore() {
+    return Math.floor(Math.random() * 60) + 40;
+}
+
+function updatePhotoCount() {
+    const photoCountElement = document.getElementById('photoCount');
+    if (photoCountElement) {
+        // We'll update this after loading from Supabase
+        loadImagesFromSupabase().then(images => {
+            photoCountElement.textContent = images.length;
+        });
+    }
+}
+
 // ========== MAKE FUNCTIONS GLOBALLY AVAILABLE ==========
 window.login = login;
 window.logout = logout;
@@ -545,7 +743,13 @@ window.closeMemberModal = function() {
     currentViewingMember = null;
 };
 window.handlePhotoUpload = handlePhotoUpload;
+window.previewSupabasePhoto = previewSupabasePhoto;
+window.deleteSupabasePhoto = deleteSupabasePhoto;
+window.downloadFromUrl = downloadFromUrl;
 
-// ========== EXPORT ALL YOUR EXISTING FUNCTIONS ==========
-// Add this line at the end to export everything
+// ========== EXPORT ALL REMAINING FUNCTIONS ==========
+// Add all your existing functions here (addStockItem, updateTodoList, etc.)
+// They should remain exactly as they were in your original code
+
 console.log('✅ app.js fully loaded with Supabase integration!');
+console.log('📊 Dashboard ready. Current user:', currentUser);
