@@ -1133,6 +1133,26 @@
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             }
         }
+        /* Prevent zoom on mobile devices */
+html, body {
+    touch-action: pan-y;
+    -ms-touch-action: pan-y;
+    overflow-x: hidden;
+}
+
+/* Prevent double-tap zoom on mobile */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+/* Prevent text selection */
+body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
     </style>
 </head>
 <body>
@@ -3056,3 +3076,4 @@
 </body>
 
 </html>
+
