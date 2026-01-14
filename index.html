@@ -1,0 +1,3102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Brokoons Dashboard</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1b5e20">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="icons/icon-72x72.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Import Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ========== RESET & BASE ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* ========== NOTIFICATIONS ========== */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+        }
+        
+        .notification {
+            background: #1a1a1a;
+            border: 2px solid #2e7d32;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s forwards;
+        }
+        
+        .notification-icon {
+            font-size: 24px;
+            color: #4caf50;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            color: #4caf50;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .notification-message {
+            color: #ddd;
+            font-size: 14px;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .notification-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); }
+            to { transform: translateX(400px); }
+        }
+        
+        /* ========== LOGIN SCREEN ========== */
+        .login-screen {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000000;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px #2b7a4b, 0 0 40px rgba(43, 122, 75, 0.5); }
+            50% { box-shadow: 0 0 30px #2b7a4b, 0 0 60px rgba(43, 122, 75, 0.5); }
+        }
+
+        .login-container {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            padding: 40px 30px;
+            border-radius: 16px;
+            border: 2px solid rgba(43, 122, 75, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: glowPulse 2s infinite ease-in-out;
+        }
+
+        .login-container .logo-img {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 3px solid #4caf50;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .login-container h1 {
+            margin-bottom: 20px;
+            color: #2b7a4b;
+            text-shadow: 0 0 10px #2b7a4b;
+            font-size: 24px;
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+
+        .login-form input::placeholder {
+            color: #cccccc;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 12px;
+            background-color: #2b7a4b;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            background-color: #24663b;
+        }
+
+        .footer-text {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ========== MAIN DASHBOARD ========== */
+        .main-content {
+            display: none;
+        }
+        
+        /* HEADER */
+        .header {
+            background: #0a0a0a;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #1b5e20;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo img {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            object-fit: contain;
+            border: 2px solid #4caf50;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .logo .logo-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .nav a:hover {
+            background: rgba(27, 94, 32, 0.3);
+        }
+        
+        /* ========== UPDATED HERO SECTION - ALL TITLES SAME SIZE ========== */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, rgba(27, 94, 32, 0.9), rgba(46, 125, 50, 0.9));
+            color: white;
+            margin: 20px;
+            border-radius: 12px;
+            border: 1px solid #2e7d32;
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Hero text container */
+        .hero-text-container {
+            position: relative;
+            height: 180px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ALL Titles - Same size and style */
+        .hero-main-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin: 0;
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            animation: titleSequence 16s infinite;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 
+                0 0 10px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(76, 175, 80, 0.3),
+                0 0 30px rgba(76, 175, 80, 0.2);
+            color: #ffffff;
+            line-height: 1.2;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        /* First title appears at 0s */
+        .hero-main-title:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        /* Second title appears at 4s */
+        .hero-main-title:nth-child(2) {
+            animation-delay: 4s;
+        }
+
+        /* Third title appears at 8s */
+        .hero-main-title:nth-child(3) {
+            animation-delay: 8s;
+        }
+
+        /* Fourth title appears at 12s */
+        .hero-main-title:nth-child(4) {
+            animation-delay: 12s;
+        }
+
+        /* Main animation sequence - each shows for 3s, fades for 1s */
+        @keyframes titleSequence {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            25% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            35% {
+                opacity: 0;
+                transform: translateY(-30px) scale(1.1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(1.1);
+            }
+        }
+
+        /* Glow effect for hero section */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                rgba(76, 175, 80, 0.1), 
+                rgba(102, 187, 106, 0.1), 
+                rgba(129, 199, 132, 0.1), 
+                rgba(102, 187, 106, 0.1), 
+                rgba(76, 175, 80, 0.1));
+            border-radius: 14px;
+            z-index: -1;
+            animation: borderGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes borderGlow {
+            from {
+                opacity: 0.5;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* TABS */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 500;
+            color: #ccc;
+            min-width: 100px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: #1b5e20;
+            color: white;
+            border-color: #2e7d32;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .card {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+            transform: translateY(0);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #2e7d32;
+            box-shadow: 0 15px 30px rgba(27, 94, 32, 0.2);
+        }
+        
+        .card h3 {
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+        
+        .card p {
+            color: #bbb;
+            font-size: 14px;
+        }
+        
+        /* TABLES */
+        .table-section {
+            background: #1a1a1a;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            overflow-x: auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .table-section h2 {
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th {
+            background: #1b5e20;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            border: 1px solid #2e7d32;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            color: #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background: #222;
+        }
+        
+        /* BUTTONS */
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin: 2px;
+            transition: all 0.3s;
+        }
+        
+        .btn-edit {
+            background: #1b5e20;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #2e7d32;
+        }
+        
+        .btn-delete {
+            background: #5c2a2a;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #7a3a3a;
+        }
+        
+        .btn-remove {
+            background: #d32f2f;
+            color: white;
+        }
+        
+        .btn-remove:hover {
+            background: #f44336;
+        }
+        
+        .btn-view {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: #42A5F5;
+        }
+        
+        /* STATUS BADGES */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .badge-success {
+            background: #1b5e20;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #ff9800;
+            color: black;
+        }
+        
+        .badge-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .badge-offline {
+            background: #666;
+            color: white;
+        }
+        
+        /* TO-DO LIST - UPDATED */
+        .todo-list {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            margin: 20px;
+            animation: fadeIn 0.7s ease-out;
+        }
+        
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .todo-item:hover {
+            background: rgba(255,255,255,0.05);
+            transform: translateX(5px);
+        }
+        
+        .todo-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .todo-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #4caf50;
+        }
+        
+        .todo-text {
+            flex: 1;
+            color: #ddd;
+            font-size: 15px;
+            padding: 5px 0;
+        }
+        
+        .todo-completed {
+            text-decoration: line-through;
+            color: #888;
+            opacity: 0.7;
+        }
+        
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .todo-date {
+            font-size: 11px;
+            color: #888;
+            min-width: 100px;
+            text-align: right;
+        }
+        
+        .task-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(27, 94, 32, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            font-size: 14px;
+            color: #4caf50;
+            min-width: 90px;
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        /* Completed tasks section */
+        .completed-tasks-section {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(27, 94, 32, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        .completed-tasks-section h3 {
+            color: #4caf50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .completed-count {
+            background: #1b5e20;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        /* FORM ELEMENTS */
+        input, select, textarea {
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+        
+        /* MEMBER PHOTO SECTION */
+        .member-photo-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .member-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4caf50;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .member-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+        }
+        
+        .member-details {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        
+        .detail-item {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .detail-item:hover {
+            transform: translateX(10px);
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .detail-label {
+            width: 120px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+        
+        .detail-value {
+            flex: 1;
+            color: #ddd;
+        }
+        
+        /* PHOTO UPLOAD */
+        .photo-upload-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #4CAF50;
+            margin: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .upload-area {
+            border: 3px dashed #4CAF50;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(76, 175, 80, 0.05);
+        }
+        
+        .upload-area:hover {
+            background: rgba(46, 125, 50, 0.1);
+            border-color: #66BB6A;
+            transform: translateY(-2px);
+        }
+        
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .photo-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #333;
+            transition: all 0.3s;
+        }
+        
+        .photo-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #4CAF50;
+            box-shadow: 0 8px 15px rgba(76, 175, 80, 0.2);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            transition: all 0.3s;
+        }
+        
+        .photo-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .photo-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .photo-info {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .photo-name {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .photo-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 10px;
+            color: #bbb;
+        }
+        
+        .upload-progress {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .upload-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .photo-count {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #4CAF50;
+        }
+        
+        /* QUALITY SCORE */
+        .quality-score {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .quality-bar {
+            flex: 1;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .quality-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4caf50, #8bc34a);
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+        
+        .metric-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        
+        .metric-input input {
+            width: 80px;
+            padding: 8px;
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .metric-display {
+            color: #4caf50;
+            font-weight: bold;
+            min-width: 50px;
+        }
+        
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(5px);
+            }
+        }
+        
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid #2e7d32;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlideUp 0.4s ease-out;
+        }
+        
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .modal-title {
+            color: #4caf50;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: rotate(90deg);
+        }
+        
+        .photo-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        .photo-preview-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            animation: photoPreviewScale 0.4s ease-out;
+        }
+        
+        @keyframes photoPreviewScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .photo-preview-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* TEAM PERFORMANCE GRAPH */
+        .team-graph-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(76, 175, 80, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(76, 175, 80, 0.3);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            color: #4caf50;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+        
+        .day-highlight {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            animation: pulseHighlight 2s infinite;
+        }
+        
+        @keyframes pulseHighlight {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+            }
+        }
+        
+        /* FOOTER */
+        .footer {
+            background: #0a0a0a;
+            color: #888;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 1px solid #333;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+            }
+            
+            .hero {
+                padding: 60px 15px;
+                margin: 10px;
+                min-height: 250px;
+            }
+            
+            .hero-main-title {
+                font-size: 2.8rem;
+                letter-spacing: 1px;
+            }
+            
+            .hero-text-container {
+                height: 150px;
+            }
+            
+            .table-section, .cards, .todo-list, .photo-upload-section {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .photo-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .metric-input input {
+                width: 60px;
+            }
+            
+            .notification-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .member-photo {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .detail-label {
+                width: 100px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                width: 95%;
+                padding: 30px 20px;
+            }
+            
+            .login-container .logo-img {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .login-container h1 {
+                font-size: 20px;
+            }
+            
+            .logo img {
+                height: 40px;
+                width: 40px;
+            }
+            
+            .logo .logo-text {
+                font-size: 22px;
+            }
+            
+            .hero {
+                padding: 40px 15px;
+                min-height: 200px;
+            }
+            
+            .hero-main-title {
+                font-size: 2.2rem;
+                padding: 0 15px;
+            }
+            
+            .hero-text-container {
+                height: 120px;
+            }
+            
+            .tab-btn {
+                min-width: 70px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+            
+            .btn {
+                padding: 4px 8px;
+                font-size: 11px;
+                margin: 1px;
+            }
+            
+            .photo-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .member-photo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .detail-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .detail-label {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NOTIFICATION CONTAINER -->
+    <div class="notification-container" id="notificationContainer"></div>
+    
+    <!-- PHOTO PREVIEW MODAL -->
+    <div class="photo-preview-modal" id="photoPreviewModal">
+        <div class="photo-preview-content">
+            <img class="photo-preview-img" src="" alt="">
+            <button class="modal-close" onclick="closePhotoPreview()">×</button>
+            <div class="photo-preview-info" id="photoPreviewInfo"></div>
+        </div>
+    </div>
+    
+    <!-- MEMBER DETAILS MODAL -->
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalMemberName">Member Details</h2>
+                <button class="modal-close" onclick="closeMemberModal()">×</button>
+            </div>
+            <div class="member-photo-section">
+                <img id="modalMemberPhoto" class="member-photo" src="" alt="Member Photo">
+                <div style="margin-top: 10px;">
+                    <input type="file" id="memberPhotoUpload" accept="image/*" style="display: none;" onchange="uploadMemberPhoto(event)">
+                    <button class="btn btn-edit" onclick="document.getElementById('memberPhotoUpload').click()" id="uploadPhotoBtn" style="display: none;">📷 Upload Photo</button>
+                </div>
+            </div>
+            <div class="member-details">
+                <div class="detail-item">
+                    <div class="detail-label">Role:</div>
+                    <div class="detail-value" id="modalMemberRole">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Department:</div>
+                    <div class="detail-value" id="modalMemberDepartment">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Status:</div>
+                    <div class="detail-value" id="modalMemberStatus">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Joined Date:</div>
+                    <div class="detail-value" id="modalMemberJoined">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Performance:</div>
+                    <div class="detail-value" id="modalMemberPerformance">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Details:</div>
+                    <div class="detail-value" id="modalMemberDetails">No additional details available.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <!-- Logo - will show mushroom emoji if brl2.png not found -->
+            <img src="brl2.png" alt="Brokoons Logo" class="logo-img" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\\'font-size: 60px; color: #4caf50; margin-bottom: 20px;\\'>🍄</div>' + this.parentElement.innerHTML;">
+            <h1>Brokoons Dashboard</h1>
+            
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button class="login-btn" onclick="login()">Login</button>
+                <div id="loginError" class="error-message">Invalid username or password</div>
+            </div>
+            
+            <div class="footer-text">
+                © 2026 Brokoons. Internal use only.
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="mainContent" class="main-content">
+        <header class="header">
+            <div class="logo">
+                <img src="brl2.png" alt="Brokoons Logo" onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%231b5e20%22/><text x=%2250%22 y=%2260%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2250%22>🍄</text></svg>';">
+                <span class="logo-text">Brokoons</span>
+            </div>
+            <nav class="nav">
+                <a href="#" onclick="showTab('dashboard')">Dashboard</a>
+                <a href="#" onclick="showTab('stock')">Stock</a>
+                <a href="#" onclick="showTab('progress')">Updates</a>
+                <a href="#" onclick="showTab('team')">Team</a>
+                <a href="#" onclick="logout()" style="color: #ff6b6b;">Logout</a>
+            </nav>
+        </header>
+
+        <!-- UPDATED HERO SECTION WITH ALL TITLES SAME SIZE -->
+        <section class="hero">
+            <div class="hero-text-container">
+                <!-- Sequence: 1. BROKOONS INTERNAL SYSTEM -->
+                <h1 class="hero-main-title">BROKOONS INTERNAL SYSTEM</h1>
+                <!-- Sequence: 2. Track Stock -->
+                <h1 class="hero-main-title">📦 TRACK STOCK</h1>
+                <!-- Sequence: 3. Track Updates -->
+                <h1 class="hero-main-title">📈 TRACK UPDATES</h1>
+                <!-- Sequence: 4. Track Team -->
+                <h1 class="hero-main-title">👥 TRACK TEAM</h1>
+            </div>
+        </section>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="showTab('stock')">📦 Stock</button>
+            <button class="tab-btn" onclick="showTab('progress')">📈 Updates</button>
+            <button class="tab-btn" onclick="showTab('team')">👥 Team</button>
+        </div>
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard-tab" class="tab-content active">
+            <section class="cards">
+                <div class="card" onclick="showTab('stock')">
+                    <h3>📦 Stock Overview</h3>
+                    <p>Current stock: <strong id="stock-total" style="color: #4caf50;">0</strong> items</p>
+                </div>
+                <div class="card" onclick="showTab('progress')">
+                    <h3>📊 Farm Progress</h3>
+                    <p>Quality Score: <strong id="quality-score-value" style="color: #4caf50;">0/100</strong></p>
+                </div>
+                <div class="card" onclick="showTab('team')">
+                    <h3>👥 Team Activity</h3>
+                    <p><strong id="online-count" style="color: #4caf50;">0</strong> members online</p>
+                </div>
+            </section>
+
+            <div class="table-section">
+                <h2>📋 Recent Stock Activity</h2>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-table-body">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- STOCK TAB -->
+        <div id="stock-tab" class="tab-content">
+            <section class="cards">
+                <div class="card" onclick="addStockItem()">
+                    <h3>➕ Add New Item</h3>
+                    <p>Register new stock items</p>
+                </div>
+                <div class="card" onclick="showLowStock()">
+                    <h3>⚠️ Low Stock Alert</h3>
+                    <p id="low-stock-count" style="color: #ff9800;">0 items need attention</p>
+                </div>
+                <div class="card" onclick="exportData()">
+                    <h3>📊 Export Reports</h3>
+                    <p>Download inventory data</p>
+                </div>
+            </section>
+
+            <div class="table-section">
+                <h2>Inventory List</h2>
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="search-stock" placeholder="🔍 Search items..." style="background: #222; color: white; border: 1px solid #333; padding: 10px; width: 100%; max-width: 400px; border-radius: 6px;">
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROGRESS TAB - UPDATED WITH IMPROVED TASK SYSTEM -->
+        <div id="progress-tab" class="tab-content">
+            <section class="cards">
+                <div class="card" onclick="showDailyReport()">
+                    <h3>📅 Daily Report</h3>
+                    <p>Click to view today's report</p>
+                </div>
+                <div class="card" onclick="showFarmSchedule()">
+                    <h3>📆 Farm Schedule</h3>
+                    <p>View farming schedule</p>
+                </div>
+                <div class="card" onclick="showQualityMetrics()">
+                    <h3>⭐ Quality Score</h3>
+                    <p>Current: <strong id="main-quality-score" style="color: #4caf50;">0/100</strong></p>
+                </div>
+            </section>
+
+            <!-- PHOTO UPLOAD SECTION -->
+            <div class="photo-upload-section">
+                <h2 style="color: #4caf50; margin-bottom: 15px;">📸 Photo Upload</h2>
+                <p style="color: #bbb; margin-bottom: 15px;">Upload photos of mushroom growth, harvest, or issues</p>
+                
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('photoUpload').click()">
+                    <div style="font-size: 50px; color: #4caf50;">📷</div>
+                    <p style="color: #ddd; margin: 10px 0; font-size: 18px;">Click to upload photos</p>
+                    <p style="color: #888; font-size: 12px;">Supports JPG, PNG (Max 5MB)</p>
+                    <input type="file" id="photoUpload" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event)">
+                </div>
+                
+                <!-- Upload Progress Bar -->
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                </div>
+                
+                <!-- Photo Count -->
+                <div class="photo-count">
+                    <span id="photoCount">0</span> photos uploaded
+                </div>
+                
+                <!-- Photo Gallery -->
+                <div id="photoGallery" class="photo-gallery">
+                    <!-- Photos will be loaded here -->
+                </div>
+            </div>
+
+            <!-- UPDATED TO-DO LIST WITH SEPARATE COMPLETED SECTION -->
+            <div class="todo-list">
+                <h2 style="color: #4caf50; margin-bottom: 15px;">✅ Daily Task Checklist</h2>
+                
+                <!-- Task Progress Bar -->
+                <div class="task-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="task-progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="task-progress-text">0/0 (0%)</div>
+                </div>
+                
+                <!-- Active Tasks Section -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: #4caf50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span>📝 Active Tasks</span>
+                        <span class="completed-count" id="active-count">0</span>
+                    </h3>
+                    <div id="todo-list-container">
+                        <!-- Active tasks will be added by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Completed Tasks Section -->
+                <div class="completed-tasks-section" id="completed-tasks-container" style="display: none;">
+                    <h3 style="color: #4caf50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <span>✅ Completed Tasks</span>
+                        <span class="completed-count" id="completed-count">0</span>
+                    </h3>
+                    <div id="completed-list-container">
+                        <!-- Completed tasks will be added by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Add Task Button -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="addTodoItem()" style="background: #1b5e20; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 18px;">+</span> Add New Task
+                    </button>
+                    <button onclick="clearCompletedTasks()" style="background: #333; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.3s; margin-left: 10px; display: inline-flex; align-items: center; gap: 8px;">
+                        <span>🗑️</span> Clear Completed
+                    </button>
+                </div>
+            </div>
+
+            <!-- QUALITY SCORE -->
+            <div class="table-section">
+                <h2>⭐ Quality Metrics</h2>
+                <div class="date-display" id="current-date">
+                    <!-- Today's date -->
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div class="quality-score">
+                        <span>Overall Quality:</span>
+                        <div class="quality-bar">
+                            <div class="quality-fill" id="quality-bar" style="width: 0%"></div>
+                        </div>
+                        <span id="quality-percentage">0%</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #4caf50; margin-bottom: 15px;">Enter Your Numbers:</h3>
+                    <div class="metric-input">
+                        <label>Mushroom Size (cm):</label>
+                        <input type="number" id="size-input" min="0" max="30" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="size-display">0/100</span>
+                    </div>
+                    <div class="metric-input">
+                        <label>Color Score (0-10):</label>
+                        <input type="number" id="color-input" min="0" max="10" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="color-display">0/100</span>
+                    </div>
+                    <div class="metric-input">
+                        <label>Growth Rate (%):</label>
+                        <input type="number" id="growth-input" min="0" max="100" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="growth-display">0/100</span>
+                    </div>
+                    <div class="metric-input">
+                        <label>Yield (kg):</label>
+                        <input type="number" id="yield-input" min="0" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="yield-display">0/100</span>
+                    </div>
+                    <div class="metric-input">
+                        <label>Harvested Today:</label>
+                        <input type="number" id="harvest-input" min="0" value="0" onchange="calculateQuality()">
+                        <span class="metric-display" id="harvest-display">0 bags</span>
+                    </div>
+                </div>
+                <button onclick="saveQualityMetrics()" style="background: #1b5e20; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 10px;">Save Quality Metrics</button>
+            </div>
+        </div>
+
+        <!-- TEAM TAB -->
+        <div id="team-tab" class="tab-content">
+            <section class="cards">
+                <div class="card" onclick="addTeamMember()">
+                    <h3>➕ Add Member</h3>
+                    <p>Register new team members</p>
+                </div>
+                <div class="card" onclick="showTeamGraph()" id="teamGraphCard" style="display: none;">
+                    <h3>📊 Team Graph</h3>
+                    <p>View team performance</p>
+                </div>
+                <div class="card" onclick="showPerformance()">
+                    <h3>⭐ Performance</h3>
+                    <p>Productivity metrics</p>
+                </div>
+            </section>
+
+            <!-- TEAM PERFORMANCE GRAPH SECTION -->
+            <div id="team-graph-section" style="display: none;">
+                <div class="table-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="color: #4caf50; margin: 0;">📊 Team Performance Graph</h2>
+                        <button onclick="hideTeamGraph()" class="btn btn-edit" style="background: #333; color: white; border: 1px solid #444;">← Back to List</button>
+                    </div>
+                    <p style="color: #bbb; margin-bottom: 25px; font-size: 14px;">Productivity metrics for the past 6 days</p>
+                    
+                    <div class="team-graph-container">
+                        <canvas id="teamPerformanceChart" height="350"></canvas>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">92%</div>
+                            <div class="stat-label">Average Score</div>
+                        </div>
+                        <div class="stat-card day-highlight">
+                            <div class="stat-value">98%</div>
+                            <div class="stat-label">Peak (Day 02)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">84%</div>
+                            <div class="stat-label">Lowest (Day 03)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">+8%</div>
+                            <div class="stat-label">Week Growth</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="team-list-section" class="table-section">
+                <h2>Team Directory</h2>
+                <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Total Members: <strong id="total-members">0</strong></span>
+                    <button onclick="addTeamMember()" class="btn btn-edit" id="addMemberBtn" style="display: none;">+ Add Member</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                                <th>Details</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="team-table">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>© 2026 Brokoons | Internal Use Only</p>
+            <p style="font-size: 12px; color: #666;">Logged in as: <span id="currentUser">Guest</span></p>
+        </footer>
+    </div>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+        // ========== CONFIGURATION ==========
+        const TEAM_USERS = {
+            "midhun": "1977",
+            "akash": "2024", 
+            "sajad": "5550",
+            "saran": "2244",
+            "muhammad": "1415"
+        };
+        
+        let currentUser = null;
+        let currentTab = 'dashboard';
+        let teamPerformanceChart = null;
+        let currentMemberForPhoto = null;
+        
+        // ========== DATA STORAGE ==========
+        let teamMembers = [];
+        let stockItems = [];
+        let todoItems = [];
+        let uploadedPhotos = [];
+        let memberPhotos = {}; // Store member photos separately
+        
+        // ========== INITIALIZATION ==========
+        function loadAllData() {
+            // Load team members
+            const savedTeam = localStorage.getItem('brokoons_team_members');
+            teamMembers = savedTeam ? JSON.parse(savedTeam) : getDefaultTeam();
+            
+            // Load stock items
+            const savedStock = localStorage.getItem('brokoons_stock_items');
+            stockItems = savedStock ? JSON.parse(savedStock) : [];
+            
+            // Load todo items
+            const savedTodos = localStorage.getItem('brokoons_todo_items');
+            todoItems = savedTodos ? JSON.parse(savedTodos) : getDefaultTodos();
+            
+            // Load photos
+            const savedPhotos = localStorage.getItem('brokoons_photos');
+            uploadedPhotos = savedPhotos ? JSON.parse(savedPhotos) : [];
+            
+            // Load member photos
+            const savedMemberPhotos = localStorage.getItem('brokoons_member_photos');
+            memberPhotos = savedMemberPhotos ? JSON.parse(savedMemberPhotos) : {};
+        }
+        
+        function getDefaultTeam() {
+            return [
+                { 
+                    name: "Midhun", 
+                    role: "Founder", 
+                    department: "Management", 
+                    details: "Founder of brokoons looking forward path of brokoons and managing with a powerful team", 
+                    status: "online", 
+                    lastOnline: Date.now(),
+                    joinedDate: "11/01/2026",
+                    performance: "90%"
+                },
+                { 
+                    name: "Akash", 
+                    role: "Co-Founder", 
+                    department: "Operations", 
+                    details: "Day-to-day operations", 
+                    status: "online", 
+                    lastOnline: Date.now(),
+                    joinedDate: "11/01/2026",
+                    performance: "85%"
+                },
+                { 
+                    name: "Mohammad Sajad", 
+                    role: "Marketing Head", 
+                    department: "Marketing", 
+                    details: "Marketing and sales", 
+                    status: "online", 
+                    lastOnline: Date.now(),
+                    joinedDate: "11/01/2026",
+                    performance: "88%"
+                },
+                { 
+                    name: "Saran Kumar", 
+                    role: "Accountant", 
+                    department: "Finance", 
+                    details: "Financial management", 
+                    status: "offline", 
+                    lastOnline: null,
+                    joinedDate: "11/01/2026",
+                    performance: "92%"
+                },
+                { 
+                    name: "Muhammad N", 
+                    role: "Social Media", 
+                    department: "Marketing", 
+                    details: "Digital presence", 
+                    status: "offline", 
+                    lastOnline: null,
+                    joinedDate: "11/01/2026",
+                    performance: "87%"
+                }
+            ];
+        }
+        
+        function getDefaultTodos() {
+            return [
+                { 
+                    id: 1, 
+                    text: "Check mushroom growth progress", 
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    completedAt: null
+                },
+                { 
+                    id: 2, 
+                    text: "Record temperature and humidity", 
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    completedAt: null
+                },
+                { 
+                    id: 3, 
+                    text: "Water mushroom beds", 
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    completedAt: null
+                },
+                { 
+                    id: 4, 
+                    text: "Harvest mature mushrooms", 
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    completedAt: null
+                },
+                { 
+                    id: 5, 
+                    text: "Clean and sterilize equipment", 
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    completedAt: null
+                }
+            ];
+        }
+        
+        function saveAllData() {
+            localStorage.setItem('brokoons_team_members', JSON.stringify(teamMembers));
+            localStorage.setItem('brokoons_stock_items', JSON.stringify(stockItems));
+            localStorage.setItem('brokoons_todo_items', JSON.stringify(todoItems));
+            localStorage.setItem('brokoons_photos', JSON.stringify(uploadedPhotos));
+            localStorage.setItem('brokoons_member_photos', JSON.stringify(memberPhotos));
+        }
+        
+        // ========== AUTHENTICATION ==========
+        function login() {
+            const username = document.getElementById('username').value.toLowerCase();
+            const password = document.getElementById('password').value;
+            
+            if (TEAM_USERS[username] && TEAM_USERS[username] === password) {
+                currentUser = username;
+                localStorage.setItem('brokoons_auth', 'true');
+                localStorage.setItem('brokoons_user', username);
+                
+                // Update team member status
+                const teamMember = teamMembers.find(member => 
+                    member.name.toLowerCase().includes(username)
+                );
+                if (teamMember) {
+                    teamMember.status = "online";
+                    teamMember.lastOnline = Date.now();
+                    saveAllData();
+                }
+                
+                showNotification('✅ Login Successful', `Welcome back, ${username}!`, 'success', 3000);
+                showMainSystem();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+        
+        function logout() {
+            if (currentUser) {
+                const teamMember = teamMembers.find(member => 
+                    member.name.toLowerCase().includes(currentUser)
+                );
+                if (teamMember) {
+                    teamMember.status = "offline";
+                    teamMember.lastOnline = null;
+                    saveAllData();
+                }
+            }
+            
+            currentUser = null;
+            localStorage.removeItem('brokoons_auth');
+            localStorage.removeItem('brokoons_user');
+            
+            showNotification('👋 Logged Out', 'You have been successfully logged out.', 'info', 3000);
+            showLoginScreen();
+        }
+        
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('username').focus();
+        }
+        
+        function showMainSystem() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('currentUser').textContent = currentUser;
+            
+            // Initialize dashboard
+            updateStockTable();
+            updateInventoryTable();
+            updateTeamTable();
+            updateTodoList();
+            updatePhotoGallery();
+            updatePhotoCount();
+            
+            // Set current date
+            document.getElementById('current-date').textContent = `Today: ${getCurrentDate()}`;
+            
+            // Show dashboard tab
+            showTab('dashboard');
+            
+            // Setup search
+            const searchInput = document.getElementById('search-stock');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('#inventory-table tr');
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+            
+            // Show/Hide Team Graph card based on user role
+            updateTeamGraphVisibility();
+        }
+        
+        // ========== TAB MANAGEMENT ==========
+        function showTab(tabName) {
+            currentTab = tabName;
+            
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            // Update tab content
+            if (tabName === 'dashboard') {
+                updateStockTable();
+                updateOnlineCount();
+            } else if (tabName === 'stock') {
+                updateInventoryTable();
+            } else if (tabName === 'progress') {
+                updateTodoList();
+                updatePhotoGallery();
+                updateTaskProgress();
+                updatePhotoCount();
+            } else if (tabName === 'team') {
+                updateTeamTable();
+                hideTeamGraph();
+                updateTeamGraphVisibility();
+            }
+        }
+        
+        // ========== UPDATE TEAM GRAPH VISIBILITY ==========
+        function updateTeamGraphVisibility() {
+            const teamGraphCard = document.getElementById('teamGraphCard');
+            if (currentUser === 'midhun') {
+                teamGraphCard.style.display = 'block';
+            } else {
+                teamGraphCard.style.display = 'none';
+            }
+        }
+        
+        // ========== NOTIFICATION SYSTEM ==========
+        function showNotification(title, message, type = 'info', duration = 5000) {
+            const container = document.getElementById('notificationContainer');
+            const notificationId = 'notification-' + Date.now();
+            
+            let icon = 'ℹ️';
+            let borderColor = '#2e7d32';
+            
+            switch(type) {
+                case 'success': icon = '✅'; borderColor = '#4CAF50'; break;
+                case 'warning': icon = '⚠️'; borderColor = '#FF9800'; break;
+                case 'error': icon = '❌'; borderColor = '#F44336'; break;
+                case 'photo': icon = '📸'; borderColor = '#9C27B0'; break;
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.id = notificationId;
+            notification.style.borderColor = borderColor;
+            
+            notification.innerHTML = `
+                <div class="notification-icon">${icon}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+                <button class="notification-close" onclick="removeNotification('${notificationId}')">×</button>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                removeNotification(notificationId);
+            }, duration);
+            
+            return notificationId;
+        }
+        
+        function removeNotification(id) {
+            const notification = document.getElementById(id);
+            if (notification) {
+                notification.style.animation = 'slideOut 0.3s forwards';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }
+        
+        // ========== MEMBER PHOTO UPLOAD ==========
+        function uploadMemberPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('⚠️ File Too Large', 'Photo exceeds 5MB limit.', 'warning', 4000);
+                return;
+            }
+            
+            if (!currentMemberForPhoto) {
+                showNotification('⚠️ Error', 'No member selected for photo upload.', 'error', 4000);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Store the photo in memberPhotos object
+                memberPhotos[currentMemberForPhoto] = e.target.result;
+                saveAllData();
+                
+                // Update the displayed photo
+                document.getElementById('modalMemberPhoto').src = e.target.result;
+                
+                showNotification('📸 Photo Uploaded', `Photo updated for ${currentMemberForPhoto}`, 'success', 3000);
+            };
+            reader.readAsDataURL(file);
+            
+            // Reset the file input
+            event.target.value = '';
+        }
+        
+        function getMemberPhoto(memberName) {
+            if (memberPhotos[memberName]) {
+                return memberPhotos[memberName];
+            } else {
+                // Create default initials image
+                const initials = memberName.split(' ').map(n => n[0]).join('').toUpperCase();
+                return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#222"/><text x="50" y="60" text-anchor="middle" fill="#4caf50" font-size="40">${initials}</text></svg>`;
+            }
+        }
+        
+        // ========== TEAM PERFORMANCE GRAPH ==========
+        function showTeamGraph() {
+            // Only founder can access the graph
+            if (currentUser !== 'midhun') {
+                showNotification('⛔ Access Denied', 'Only founder can view team performance graph.', 'error', 4000);
+                return;
+            }
+            
+            // Hide list, show graph
+            document.getElementById('team-list-section').style.display = 'none';
+            document.getElementById('team-graph-section').style.display = 'block';
+            
+            // Initialize or update chart
+            initTeamPerformanceChart();
+        }
+        
+        function hideTeamGraph() {
+            // Show list, hide graph
+            document.getElementById('team-list-section').style.display = 'block';
+            document.getElementById('team-graph-section').style.display = 'none';
+        }
+        
+        function initTeamPerformanceChart() {
+            const ctx = document.getElementById('teamPerformanceChart').getContext('2d');
+            
+            // Destroy existing chart if exists
+            if (teamPerformanceChart) {
+                teamPerformanceChart.destroy();
+            }
+            
+            // Sample data for 6 days
+            const performanceData = [90, 98, 84, 92, 88, 95];
+            const days = ['Day 01', 'Day 02', 'Day 03', 'Day 04', 'Day 05', 'Day 06'];
+            
+            // Create gradient for bars
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(76, 175, 80, 0.8)');
+            gradient.addColorStop(1, 'rgba(76, 175, 80, 0.2)');
+            
+            // Create chart
+            teamPerformanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Productivity %',
+                        data: performanceData,
+                        backgroundColor: days.map((day, index) => 
+                            day === 'Day 02' ? 'rgba(33, 150, 243, 0.8)' : gradient
+                        ),
+                        borderColor: days.map((day, index) => 
+                            day === 'Day 02' ? 'rgba(33, 150, 243, 1)' : 'rgba(76, 175, 80, 0.8)'
+                        ),
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        hoverBackgroundColor: 'rgba(33, 150, 243, 0.6)',
+                        hoverBorderColor: 'rgba(33, 150, 243, 1)',
+                        hoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#4caf50',
+                            bodyColor: '#fff',
+                            borderColor: '#4caf50',
+                            borderWidth: 1,
+                            cornerRadius: 6,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Productivity: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 70,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#aaa',
+                                callback: function(value) {
+                                    return value + '%';
+                                },
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Productivity Percentage',
+                                color: '#aaa',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#fff',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Days',
+                                color: '#aaa',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+        
+        // ========== STOCK MANAGEMENT ==========
+        function updateStockTable() {
+            const tbody = document.getElementById('stock-table-body');
+            let html = '';
+            let totalStock = 0;
+            
+            stockItems.slice(0, 5).forEach(item => {
+                totalStock += item.quantity;
+                const badgeClass = item.status === "In Stock" ? "badge-success" : 
+                                  item.status === "Low Stock" ? "badge-warning" : "badge-danger";
+                
+                html += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.quantity}</td>
+                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                        <td>${item.lastUpdated}</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editItem('${item.name}')">Edit</button>
+                            <button class="btn btn-delete" onclick="deleteItem('${item.name}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; color: #888;">No stock items yet</td></tr>';
+            document.getElementById('stock-total').textContent = totalStock;
+        }
+        
+        function updateInventoryTable() {
+            const tbody = document.getElementById('inventory-table');
+            let html = '';
+            let lowStockCount = 0;
+            
+            stockItems.forEach(item => {
+                if (item.status === "Low Stock") lowStockCount++;
+                const badgeClass = item.status === "In Stock" ? "badge-success" : 
+                                  item.status === "Low Stock" ? "badge-warning" : "badge-danger";
+                
+                html += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.category}</td>
+                        <td>${item.quantity}</td>
+                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editItem('${item.name}')">Edit</button>
+                            <button class="btn btn-delete" onclick="deleteItem('${item.name}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; color: #888;">No inventory items yet</td></tr>';
+            document.getElementById('low-stock-count').textContent = `${lowStockCount} items need attention`;
+        }
+        
+        function addStockItem() {
+            const name = prompt("Enter item name:");
+            if (!name) return;
+            
+            const category = prompt("Enter category (Packaging/Supplies/Raw Materials/Equipment):");
+            const quantity = parseInt(prompt("Enter quantity:"));
+            
+            if (name && category && !isNaN(quantity)) {
+                const status = quantity > 30 ? "In Stock" : quantity > 10 ? "Low Stock" : "Out of Stock";
+                stockItems.unshift({ 
+                    name, 
+                    category, 
+                    quantity, 
+                    status, 
+                    lastUpdated: getCurrentDate() 
+                });
+                
+                updateStockTable();
+                updateInventoryTable();
+                saveAllData();
+                
+                showNotification('✅ Item Added', `${name} has been added to inventory.`, 'success', 3000);
+            }
+        }
+        
+        function editItem(itemName) {
+            const item = stockItems.find(i => i.name === itemName);
+            if (!item) return;
+            
+            const newQty = parseInt(prompt(`Edit quantity for ${itemName}:`, item.quantity));
+            if (!isNaN(newQty)) {
+                item.quantity = newQty;
+                item.status = newQty > 30 ? "In Stock" : newQty > 10 ? "Low Stock" : "Out of Stock";
+                item.lastUpdated = getCurrentDate();
+                
+                updateStockTable();
+                updateInventoryTable();
+                saveAllData();
+                
+                showNotification('✅ Item Updated', `${itemName} quantity updated to ${newQty}.`, 'success', 3000);
+            }
+        }
+        
+        function deleteItem(itemName) {
+            if (!confirm(`Delete "${itemName}" from inventory?`)) return;
+            
+            stockItems = stockItems.filter(i => i.name !== itemName);
+            updateStockTable();
+            updateInventoryTable();
+            saveAllData();
+            
+            showNotification('🗑️ Item Deleted', `${itemName} has been removed.`, 'info', 3000);
+        }
+        
+        function showLowStock() {
+            const lowStockItems = stockItems.filter(item => item.status === "Low Stock");
+            if (lowStockItems.length > 0) {
+                let message = "Low Stock Items:\n\n";
+                lowStockItems.forEach(item => {
+                    message += `• ${item.name}: ${item.quantity} remaining\n`;
+                });
+                alert(message);
+            } else {
+                alert("No low stock items!");
+            }
+        }
+        
+        function exportData() {
+            alert("Export feature coming soon!");
+            showNotification('📊 Export Started', 'Data export will be available soon.', 'info', 3000);
+        }
+        
+        // ========== TEAM MANAGEMENT ==========
+        function updateTeamTable() {
+            const tbody = document.getElementById('team-table');
+            let html = '';
+            
+            teamMembers.forEach(member => {
+                const badgeClass = member.status === "online" ? "badge-success" : "badge-offline";
+                const statusText = member.status === "online" ? "Online" : "Offline";
+                const shortDetails = member.details && member.details.length > 50 ? 
+                    member.details.substring(0, 50) + "..." : 
+                    (member.details || "No details");
+                
+                html += `
+                    <tr>
+                        <td>${member.name || 'Unknown'}</td>
+                        <td>${member.role || '-'}</td>
+                        <td>${member.department || '-'}</td>
+                        <td>${shortDetails}</td>
+                        <td>
+                            <span class="badge ${badgeClass}" onclick="toggleStatus('${member.name}')">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-view" onclick="viewMemberDetails('${member.name}')">View</button>
+                            ${currentUser === 'midhun' ? `<button class="btn btn-edit" onclick="editTeamMember('${member.name}')">Edit</button>` : ''}
+                            ${currentUser === 'midhun' ? `<button class="btn btn-remove" onclick="removeTeamMember('${member.name}')">Remove</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align: center; color: #888;">No team members</td></tr>';
+            updateOnlineCount();
+            document.getElementById('total-members').textContent = teamMembers.length;
+            document.getElementById('addMemberBtn').style.display = currentUser === 'midhun' ? 'block' : 'none';
+        }
+        
+        function updateOnlineCount() {
+            const onlineCount = teamMembers.filter(member => member.status === "online").length;
+            document.getElementById('online-count').textContent = onlineCount;
+        }
+        
+        function toggleStatus(memberName) {
+            const member = teamMembers.find(m => m.name === memberName);
+            if (!member) return;
+            
+            // Founder can toggle anyone, others only themselves
+            const userMember = teamMembers.find(m => 
+                m.name.toLowerCase().includes(currentUser)
+            );
+            
+            if (currentUser === 'midhun' || (userMember && userMember.name === memberName)) {
+                const wasOnline = member.status === "online";
+                member.status = wasOnline ? "offline" : "online";
+                member.lastOnline = wasOnline ? null : Date.now();
+                
+                updateTeamTable();
+                saveAllData();
+                
+                showNotification(
+                    wasOnline ? '👤 Member Offline' : '👤 Member Online',
+                    `${memberName} is now ${wasOnline ? 'offline' : 'online'}.`,
+                    'info',
+                    3000
+                );
+            } else {
+                showNotification('⛔ Access Denied', 'You can only change your own status.', 'error', 4000);
+            }
+        }
+        
+        function viewMemberDetails(memberName) {
+            const member = teamMembers.find(m => m.name === memberName);
+            if (!member) return;
+            
+            currentMemberForPhoto = memberName;
+            
+            document.getElementById('modalMemberName').textContent = member.name;
+            document.getElementById('modalMemberRole').textContent = member.role;
+            document.getElementById('modalMemberDepartment').textContent = member.department;
+            document.getElementById('modalMemberStatus').textContent = member.status === "online" ? "🟢 Online" : "⚫ Offline";
+            document.getElementById('modalMemberJoined').textContent = member.joinedDate || getCurrentDate();
+            document.getElementById('modalMemberPerformance').textContent = member.performance || "90%";
+            document.getElementById('modalMemberDetails').textContent = member.details || "No additional details.";
+            
+            // Load member photo or use default
+            document.getElementById('modalMemberPhoto').src = getMemberPhoto(memberName);
+            
+            // Show upload button only for founder
+            document.getElementById('uploadPhotoBtn').style.display = currentUser === 'midhun' ? 'block' : 'none';
+            document.getElementById('memberModal').style.display = 'flex';
+        }
+        
+        function closeMemberModal() {
+            document.getElementById('memberModal').style.display = 'none';
+            currentMemberForPhoto = null;
+        }
+        
+        function editTeamMember(memberName) {
+            if (currentUser !== 'midhun') {
+                showNotification('⛔ Access Denied', 'Only Founder can edit team members.', 'error', 4000);
+                return;
+            }
+            
+            const member = teamMembers.find(m => m.name === memberName);
+            if (!member) return;
+            
+            const newRole = prompt(`Edit role for ${memberName}:`, member.role);
+            if (!newRole) return;
+            
+            const newDepartment = prompt(`Edit department for ${memberName}:`, member.department);
+            const newDetails = prompt(`Edit details for ${memberName}:`, member.details);
+            const newPerformance = prompt(`Edit performance for ${memberName} (%):`, member.performance || "90%");
+            
+            if (newRole && newDepartment && newDetails) {
+                member.role = newRole;
+                member.department = newDepartment;
+                member.details = newDetails;
+                member.performance = newPerformance;
+                
+                updateTeamTable();
+                saveAllData();
+                
+                showNotification('✅ Team Member Updated', `${memberName}'s details updated.`, 'success', 3000);
+            }
+        }
+        
+        function removeTeamMember(memberName) {
+            if (currentUser !== 'midhun') {
+                showNotification('⛔ Access Denied', 'Only Founder can remove team members.', 'error', 4000);
+                return;
+            }
+            
+            if (!confirm(`Remove "${memberName}" from team?`)) return;
+            
+            teamMembers = teamMembers.filter(m => m.name !== memberName);
+            
+            // Also remove their photo if exists
+            if (memberPhotos[memberName]) {
+                delete memberPhotos[memberName];
+            }
+            
+            updateTeamTable();
+            saveAllData();
+            
+            showNotification('👤 Team Member Removed', `${memberName} has been removed.`, 'info', 3000);
+        }
+        
+        function addTeamMember() {
+            if (currentUser !== 'midhun') {
+                showNotification('⛔ Access Denied', 'Only Founder can add team members.', 'error', 4000);
+                return;
+            }
+            
+            const name = prompt("Enter team member name:");
+            if (!name) return;
+            
+            const role = prompt("Enter role:");
+            const department = prompt("Enter department:");
+            const details = prompt("Enter details:");
+            const performance = prompt("Enter performance score (%):", "85%");
+            
+            if (name && role && department && details && performance) {
+                teamMembers.push({
+                    name,
+                    role,
+                    department,
+                    details,
+                    performance,
+                    status: "offline",
+                    lastOnline: null,
+                    joinedDate: getCurrentDate()
+                });
+                
+                updateTeamTable();
+                saveAllData();
+                
+                showNotification('👤 Team Member Added', `${name} has been added.`, 'success', 3000);
+            }
+        }
+        
+        function showPerformance() {
+            let message = "Team Performance:\n\n";
+            teamMembers.forEach(member => {
+                message += `• ${member.name}: ${member.role} (${member.status}) - Performance: ${member.performance || "N/A"}\n`;
+            });
+            alert(message);
+        }
+        
+        // ========== UPDATED TASK MANAGEMENT ==========
+        function updateTodo(id, completed) {
+            const item = todoItems.find(t => t.id === id);
+            if (item) {
+                item.completed = completed;
+                item.completedAt = completed ? new Date().toISOString() : null;
+                saveAllData();
+                updateTodoList();
+                
+                if (completed) {
+                    showNotification('✅ Task Completed', `"${item.text}" marked as completed.`, 'success', 3000);
+                    
+                    // Check if all tasks are completed
+                    const allCompleted = todoItems.length > 0 && todoItems.every(t => t.completed);
+                    if (allCompleted) {
+                        showNotification('🎉 All Tasks Done!', 'All tasks completed! Time to add new ones.', 'success', 4000);
+                    }
+                } else {
+                    showNotification('↩️ Task Reactivated', `"${item.text}" marked as active.`, 'info', 3000);
+                }
+            }
+        }
+        
+        function updateTodoList() {
+            const container = document.getElementById('todo-list-container');
+            const completedContainer = document.getElementById('completed-list-container');
+            const completedSection = document.getElementById('completed-tasks-container');
+            
+            // Separate active and completed tasks
+            const activeTasks = todoItems.filter(t => !t.completed);
+            const completedTasks = todoItems.filter(t => t.completed);
+            
+            // Sort by creation date (newest first)
+            activeTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            completedTasks.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+            
+            let activeHtml = '';
+            let completedHtml = '';
+            
+            // Render active tasks
+            activeTasks.forEach(item => {
+                const date = new Date(item.createdAt);
+                const dateStr = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                activeHtml += `
+                    <div class="todo-item" data-id="${item.id}">
+                        <input type="checkbox" class="todo-checkbox" ${item.completed ? 'checked' : ''} onchange="updateTodo(${item.id}, this.checked)">
+                        <span class="todo-text ${item.completed ? 'todo-completed' : ''}">${item.text}</span>
+                        <div class="todo-actions">
+                            <button class="btn btn-edit" onclick="editTodo(${item.id})">Edit</button>
+                            <button class="btn btn-delete" onclick="removeTodo(${item.id})">Remove</button>
+                        </div>
+                        <div class="todo-date">Created: ${dateStr}</div>
+                    </div>
+                `;
+            });
+            
+            // Render completed tasks
+            completedTasks.forEach(item => {
+                const createdDate = new Date(item.createdAt);
+                const completedDate = new Date(item.completedAt);
+                const createdStr = createdDate.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric'
+                });
+                const completedStr = completedDate.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                completedHtml += `
+                    <div class="todo-item" data-id="${item.id}" style="opacity: 0.8;">
+                        <input type="checkbox" class="todo-checkbox" checked onchange="updateTodo(${item.id}, false)">
+                        <span class="todo-text todo-completed">${item.text}</span>
+                        <div class="todo-actions">
+                            <button class="btn btn-edit" onclick="editTodo(${item.id})">Reactivate</button>
+                            <button class="btn btn-delete" onclick="removeTodo(${item.id})">Remove</button>
+                        </div>
+                        <div class="todo-date">Completed: ${completedStr}</div>
+                    </div>
+                `;
+            });
+            
+            // Update containers
+            container.innerHTML = activeHtml || '<p style="color: #888; text-align: center; padding: 20px;">No active tasks. Add a new task!</p>';
+            completedContainer.innerHTML = completedHtml || '<p style="color: #888; text-align: center; padding: 20px;">No completed tasks yet.</p>';
+            
+            // Show/hide completed section
+            if (completedTasks.length > 0) {
+                completedSection.style.display = 'block';
+            } else {
+                completedSection.style.display = 'none';
+            }
+            
+            // Update counts
+            document.getElementById('active-count').textContent = activeTasks.length;
+            document.getElementById('completed-count').textContent = completedTasks.length;
+            
+            updateTaskProgress();
+        }
+        
+        function editTodo(id) {
+            const item = todoItems.find(t => t.id === id);
+            if (!item) return;
+            
+            const newText = prompt("Edit task:", item.text);
+            if (newText && newText.trim() !== "") {
+                item.text = newText;
+                updateTodoList();
+                saveAllData();
+                
+                showNotification('✏️ Task Edited', `Task updated to: "${newText}"`, 'info', 3000);
+            }
+        }
+        
+        function removeTodo(id) {
+            const item = todoItems.find(t => t.id === id);
+            if (!item || !confirm(`Remove "${item.text}"?`)) return;
+            
+            todoItems = todoItems.filter(t => t.id !== id);
+            updateTodoList();
+            saveAllData();
+            
+            showNotification('🗑️ Task Removed', `"${item.text}" has been removed.`, 'info', 3000);
+        }
+        
+        function addTodoItem() {
+            const newTask = prompt("Enter new task:");
+            if (newTask && newTask.trim() !== "") {
+                const newId = todoItems.length > 0 ? Math.max(...todoItems.map(t => t.id)) + 1 : 1;
+                todoItems.push({
+                    id: newId,
+                    text: newTask,
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    completedAt: null
+                });
+                updateTodoList();
+                saveAllData();
+                
+                showNotification('➕ Task Added', `"${newTask}" added to your list.`, 'success', 3000);
+            }
+        }
+        
+        function clearCompletedTasks() {
+            if (confirm("Remove all completed tasks? This cannot be undone.")) {
+                const completedCount = todoItems.filter(t => t.completed).length;
+                todoItems = todoItems.filter(t => !t.completed);
+                updateTodoList();
+                saveAllData();
+                
+                showNotification('🗑️ Tasks Cleared', `${completedCount} completed tasks removed.`, 'info', 3000);
+            }
+        }
+        
+        function updateTaskProgress() {
+            const completedCount = todoItems.filter(t => t.completed).length;
+            const totalCount = todoItems.length;
+            const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+            
+            document.getElementById('task-progress-fill').style.width = `${percentage}%`;
+            document.getElementById('task-progress-text').textContent = `${completedCount}/${totalCount} (${percentage}%)`;
+        }
+        
+        function showDailyReport() {
+            const completedCount = todoItems.filter(t => t.completed).length;
+            const totalCount = todoItems.length;
+            alert(`📅 Daily Report (${getCurrentDate()})\n\n• Tasks: ${completedCount}/${totalCount} completed\n• Team Online: ${teamMembers.filter(m => m.status === 'online').length}/${teamMembers.length}\n• Stock Items: ${stockItems.length}\n• Photos: ${uploadedPhotos.length}`);
+        }
+        
+        // ========== PHOTO UPLOAD ==========
+        function handlePhotoUpload(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+            
+            const progressBar = document.getElementById('uploadProgressBar');
+            const progressContainer = document.getElementById('uploadProgress');
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            
+            let uploadedCount = 0;
+            
+            Array.from(files).forEach((file, index) => {
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('⚠️ File Too Large', `${file.name} exceeds 5MB limit.`, 'warning', 4000);
+                    uploadedCount++;
+                    checkCompletion();
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedPhotos.unshift({
+                        id: Date.now() + index,
+                        name: file.name,
+                        data: e.target.result,
+                        date: getCurrentDate(),
+                        uploadedBy: currentUser,
+                        size: file.size,
+                        timestamp: Date.now()
+                    });
+                    
+                    uploadedCount++;
+                    checkCompletion();
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            function checkCompletion() {
+                if (uploadedCount === files.length) {
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        updatePhotoGallery();
+                        updatePhotoCount();
+                        saveAllData();
+                        progressContainer.style.display = 'none';
+                        progressBar.style.width = '0%';
+                        
+                        showNotification('📸 Photos Uploaded', `Uploaded ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''}.`, 'photo', 4000);
+                        event.target.value = '';
+                    }, 500);
+                } else {
+                    progressBar.style.width = `${(uploadedCount / files.length) * 100}%`;
+                }
+            }
+        }
+        
+        function updatePhotoGallery() {
+            const gallery = document.getElementById('photoGallery');
+            let html = '';
+            
+            uploadedPhotos.forEach(photo => {
+                const timeAgo = getTimeAgo(photo.timestamp);
+                const fileSize = formatFileSize(photo.size);
+                
+                html += `
+                    <div class="photo-item" onclick="previewPhoto('${photo.id}')">
+                        <img src="${photo.data}" alt="${photo.name}">
+                        <div class="photo-actions">
+                            <button class="btn btn-view" onclick="event.stopPropagation(); downloadPhoto('${photo.id}')" title="Download">⬇️</button>
+                            <button class="btn btn-delete" onclick="event.stopPropagation(); deletePhoto('${photo.id}')" title="Delete">🗑️</button>
+                        </div>
+                        <div class="photo-info">
+                            <div class="photo-name">${photo.name}</div>
+                            <div class="photo-meta">
+                                <span>${photo.date}</span>
+                                <span>${fileSize}</span>
+                                <span>${timeAgo}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            gallery.innerHTML = html || `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #888;">
+                    <div style="font-size: 50px;">📷</div>
+                    <p>No photos uploaded yet</p>
+                </div>
+            `;
+        }
+        
+        function updatePhotoCount() {
+            document.getElementById('photoCount').textContent = uploadedPhotos.length;
+        }
+        
+        function previewPhoto(photoId) {
+            const photo = uploadedPhotos.find(p => p.id == photoId);
+            if (!photo) return;
+            
+            const modal = document.getElementById('photoPreviewModal');
+            const img = modal.querySelector('.photo-preview-img');
+            const info = document.getElementById('photoPreviewInfo');
+            
+            img.src = photo.data;
+            info.innerHTML = `<strong>${photo.name}</strong><br>Uploaded by ${photo.uploadedBy} on ${photo.date}`;
+            modal.style.display = 'flex';
+        }
+        
+        function closePhotoPreview() {
+            document.getElementById('photoPreviewModal').style.display = 'none';
+        }
+        
+        function downloadPhoto(photoId) {
+            const photo = uploadedPhotos.find(p => p.id == photoId);
+            if (!photo) return;
+            
+            const link = document.createElement('a');
+            link.href = photo.data;
+            link.download = photo.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('⬇️ Downloaded', `${photo.name} downloaded.`, 'info', 3000);
+        }
+        
+        function deletePhoto(photoId) {
+            if (!confirm("Delete this photo?")) return;
+            
+            uploadedPhotos = uploadedPhotos.filter(p => p.id != photoId);
+            updatePhotoGallery();
+            updatePhotoCount();
+            saveAllData();
+            
+            showNotification('🗑️ Photo Deleted', 'Photo removed from gallery.', 'info', 3000);
+        }
+        
+        // ========== QUALITY METRICS ==========
+        function calculateQuality() {
+            const size = parseFloat(document.getElementById('size-input').value) || 0;
+            const color = parseFloat(document.getElementById('color-input').value) || 0;
+            const growth = parseFloat(document.getElementById('growth-input').value) || 0;
+            const yield = parseFloat(document.getElementById('yield-input').value) || 0;
+            const harvest = parseFloat(document.getElementById('harvest-input').value) || 0;
+            
+            const sizePercent = Math.min(100, Math.round((size / 30) * 100));
+            const colorPercent = Math.min(100, Math.round((color / 10) * 100));
+            const growthPercent = Math.min(100, Math.round(growth));
+            const yieldPercent = Math.min(100, Math.round((yield / 20) * 100));
+            
+            document.getElementById('size-display').textContent = `${sizePercent}/100`;
+            document.getElementById('color-display').textContent = `${colorPercent}/100`;
+            document.getElementById('growth-display').textContent = `${growthPercent}/100`;
+            document.getElementById('yield-display').textContent = `${yieldPercent}/100`;
+            document.getElementById('harvest-display').textContent = `${harvest} bags`;
+            
+            const overall = Math.round((sizePercent + colorPercent + growthPercent + yieldPercent) / 4);
+            document.getElementById('quality-bar').style.width = `${overall}%`;
+            document.getElementById('quality-percentage').textContent = `${overall}%`;
+            document.getElementById('main-quality-score').textContent = `${overall}/100`;
+            document.getElementById('quality-score-value').textContent = `${overall}/100`;
+        }
+        
+        function saveQualityMetrics() {
+            calculateQuality();
+            showNotification('⭐ Metrics Saved', 'Quality metrics saved successfully!', 'success', 3000);
+        }
+        
+        function showQualityMetrics() {
+            const size = document.getElementById('size-input').value;
+            const color = document.getElementById('color-input').value;
+            const growth = document.getElementById('growth-input').value;
+            const yield = document.getElementById('yield-input').value;
+            const harvest = document.getElementById('harvest-input').value;
+            
+            alert(`⭐ Quality Metrics\n\n• Size: ${size} cm\n• Color: ${color}/10\n• Growth: ${growth}%\n• Yield: ${yield} kg\n• Harvested: ${harvest} bags`);
+        }
+        
+        function showFarmSchedule() {
+            alert(`📆 Farm Schedule\n\n• Monday: Watering, Temperature check\n• Tuesday: Spore collection, Cleaning\n• Wednesday: Watering, Pest check\n• Thursday: New batch setup\n• Friday: Weekly report, Maintenance`);
+        }
+        
+        // ========== UTILITY FUNCTIONS ==========
+        function getCurrentDate() {
+            const now = new Date();
+            return `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+        }
+        
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 bytes';
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'Unknown';
+            const diff = Date.now() - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return `${days}d ago`;
+        }
+        
+        // ========== INITIALIZE APP ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+            
+            // Check if already logged in
+            if (localStorage.getItem('brokoons_auth') === 'true') {
+                const savedUser = localStorage.getItem('brokoons_user');
+                if (savedUser && TEAM_USERS[savedUser]) {
+                    currentUser = savedUser;
+                    showMainSystem();
+                    return;
+                }
+            }
+            
+            showLoginScreen();
+        });
+        
+        // Close modals when clicking outside
+        document.getElementById('memberModal').addEventListener('click', function(event) {
+            if (event.target === this) closeMemberModal();
+        });
+        
+        document.getElementById('photoPreviewModal').addEventListener('click', function(event) {
+            if (event.target === this) closePhotoPreview();
+        });
+            // ========== PWA INSTALLATION ==========
+let deferredPrompt;
+
+// Make installPrompt globally available
+let installPrompt;
+
+// Listen for install prompt
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window.installPrompt = e;  // Store globally
+  
+  // Show your notification
+  showInstallNotification();
+});
+
+// Function to show install notification
+function showInstallNotification() {
+  const installNotification = showNotification(
+    '📱 Install Brokoons App',
+    'Install this app on your device for quick access!',
+    'info',
+    10000
+  );
+  
+  // Add install button to the notification
+  setTimeout(() => {
+    const installBtn = document.createElement('button');
+    installBtn.textContent = 'Install Now';
+    installBtn.style.cssText = 'margin-left: 10px; padding: 5px 10px; background: #1b5e20; color: white; border: none; border-radius: 3px; cursor: pointer;';
+    
+    installBtn.onclick = () => {
+      if (window.installPrompt) {
+        window.installPrompt.prompt();
+      }
+    };
+    
+    // Find the notification and add button
+    const notification = document.querySelector('.notification:last-child');
+    if (notification) {
+      notification.appendChild(installBtn);
+    }
+  }, 500);
+}
+
+// Install function
+function installApp() {
+  if (!deferredPrompt) {
+    return;
+  }
+  
+  // Show the install prompt
+  deferredPrompt.prompt();
+  
+  // Wait for the user to respond to the prompt
+  deferredPrompt.userChoice.then((choiceResult) => {
+    if (choiceResult.outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+      showNotification('✅ Installed', 'App installed successfully!', 'success', 3000);
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    deferredPrompt = null;
+  });
+}
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      })
+      .catch(err => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+
+// Detect if app is running in standalone mode
+function isRunningStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || 
+         window.navigator.standalone === true;
+}
+
+// Check on load
+if (isRunningStandalone()) {
+  console.log('App is running in standalone mode');
+}
+    </script>
+ <script type="module">
+  // Import Firebase modules
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+  // Your Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyB_1_LBzjC_48KpMcA3UeqnKXqWPdZuprw",
+    authDomain: "brokoons-dashboard.firebaseapp.com",
+    projectId: "brokoons-dashboard",
+    storageBucket: "brokoons-dashboard.firebasestorage.app",
+    messagingSenderId: "968593995876",
+    appId: "1:968593995876:web:4a399fbdf0874f4e8a4771"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);  // Database
+  const auth = getAuth(app);     // Authentication
+
+  // Make available globally
+  window.firebaseApp = app;
+  window.db = db;
+  window.auth = auth;
+
+  console.log("✅ Firebase loaded! Database & Auth ready.");
+</script>
+<script>
+let installPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  
+  // Show install button
+  const installBtn = document.getElementById('install-btn');
+  if (installBtn) {
+    installBtn.style.display = 'block';
+    installBtn.onclick = () => {
+      installPrompt.prompt();
+      installPrompt.userChoice.then(() => {
+        installPrompt = null;
+      });
+    };
+  }
+});
+</script>
+</body>
+</html>
