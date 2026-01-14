@@ -21,6 +21,29 @@
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_1_LBzjC_48KpMcA3UeqnKXqWPdZuprw",
+            authDomain: "brokoons-dashboard.firebaseapp.com",
+            projectId: "brokoons-dashboard",
+            storageBucket: "brokoons-dashboard.firebasestorage.app",
+            messagingSenderId: "968593995876",
+            appId: "1:968593995876:web:4a399fbdf0874f4e8a4771"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        window.firebaseApp = app;
+        window.db = db;
+        window.firestore = { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp };
+        console.log("✅ Firebase initialized successfully!");
+    </script>
+    
     <!-- Import Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
@@ -144,15 +167,27 @@
             animation: glowPulse 2s infinite ease-in-out;
         }
 
-        .login-container .logo-img {
+        /* Fixed Logo Container */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-img {
             width: 120px;
             height: 120px;
-            margin-bottom: 20px;
             object-fit: contain;
             border-radius: 50%;
             border: 3px solid #4caf50;
             padding: 10px;
             background: rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-emoji {
+            display: none;
+            font-size: 60px;
+            color: #4caf50;
+            margin: 0 auto;
         }
 
         .login-container h1 {
@@ -267,7 +302,7 @@
             background: rgba(27, 94, 32, 0.3);
         }
         
-        /* ========== UPDATED HERO SECTION - ALL TITLES SAME SIZE ========== */
+        /* ========== UPDATED HERO SECTION ========== */
         .hero {
             text-align: center;
             padding: 80px 20px;
@@ -285,7 +320,6 @@
             align-items: center;
         }
 
-        /* Hero text container */
         .hero-text-container {
             position: relative;
             height: 180px;
@@ -295,7 +329,6 @@
             justify-content: center;
         }
 
-        /* ALL Titles - Same size and style */
         .hero-main-title {
             font-family: 'Montserrat', sans-serif;
             font-size: 3.5rem;
@@ -318,27 +351,22 @@
             box-sizing: border-box;
         }
 
-        /* First title appears at 0s */
         .hero-main-title:nth-child(1) {
             animation-delay: 0s;
         }
 
-        /* Second title appears at 4s */
         .hero-main-title:nth-child(2) {
             animation-delay: 4s;
         }
 
-        /* Third title appears at 8s */
         .hero-main-title:nth-child(3) {
             animation-delay: 8s;
         }
 
-        /* Fourth title appears at 12s */
         .hero-main-title:nth-child(4) {
             animation-delay: 12s;
         }
 
-        /* Main animation sequence - each shows for 3s, fades for 1s */
         @keyframes titleSequence {
             0% {
                 opacity: 0;
@@ -362,7 +390,6 @@
             }
         }
 
-        /* Glow effect for hero section */
         .hero::before {
             content: '';
             position: absolute;
@@ -390,7 +417,7 @@
             }
         }
         
-        /* TABS */
+        /* ========== TABS ========== */
         .tabs {
             display: flex;
             justify-content: center;
@@ -443,7 +470,248 @@
             display: block;
         }
         
-        /* CARDS */
+        /* ========== TEAM CHAT SECTION ========== */
+        .team-chat-section {
+            background: #1a1a1a;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            animation: fadeIn 0.6s ease-out;
+            display: none;
+        }
+
+        .team-chat-section.active {
+            display: block;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .chat-title {
+            color: #4caf50;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .chat-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            background: #0f0f0f;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #0a0a0a;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            animation: messageAppear 0.3s ease-out;
+        }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.sent {
+            margin-left: auto;
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 18px 18px 4px 18px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .message.received {
+            background: #222;
+            color: #ddd;
+            padding: 12px 16px;
+            border-radius: 18px 18px 18px 4px;
+            border: 1px solid #333;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .message-sender {
+            font-weight: bold;
+            color: #4caf50;
+        }
+
+        .message-time {
+            color: #888;
+        }
+
+        .message-content {
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message-status {
+            text-align: right;
+            font-size: 10px;
+            color: #888;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 3px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            padding: 15px;
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #222;
+            border: 1px solid #333;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 25px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .chat-send-btn {
+            background: #1b5e20;
+            color: white;
+            border: none;
+            padding: 0 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .chat-send-btn:hover {
+            background: #2e7d32;
+            transform: scale(1.05);
+        }
+
+        .chat-send-btn:disabled {
+            background: #333;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .online-users {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+
+        .online-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .no-messages {
+            text-align: center;
+            color: #888;
+            padding: 40px;
+            font-size: 14px;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            color: #888;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        /* ========== CARDS ========== */
         .cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -477,7 +745,7 @@
             font-size: 14px;
         }
         
-        /* TABLES */
+        /* ========== TABLES ========== */
         .table-section {
             background: #1a1a1a;
             margin: 20px;
@@ -517,7 +785,7 @@
             background: #222;
         }
         
-        /* BUTTONS */
+        /* ========== BUTTONS ========== */
         .btn {
             padding: 6px 12px;
             border: none;
@@ -564,7 +832,7 @@
             background: #42A5F5;
         }
         
-        /* STATUS BADGES */
+        /* ========== STATUS BADGES ========== */
         .badge {
             padding: 4px 10px;
             border-radius: 20px;
@@ -595,7 +863,7 @@
             color: white;
         }
         
-        /* TO-DO LIST - UPDATED */
+        /* ========== TO-DO LIST ========== */
         .todo-list {
             background: #1a1a1a;
             padding: 20px;
@@ -694,7 +962,7 @@
             font-weight: bold;
         }
         
-        /* Completed tasks section */
+        /* ========== COMPLETED TASKS ========== */
         .completed-tasks-section {
             margin-top: 25px;
             padding: 15px;
@@ -719,7 +987,7 @@
             font-size: 12px;
         }
         
-        /* FORM ELEMENTS */
+        /* ========== FORM ELEMENTS ========== */
         input, select, textarea {
             background: #222;
             border: 1px solid #333;
@@ -736,7 +1004,7 @@
             box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
         }
         
-        /* MEMBER PHOTO SECTION */
+        /* ========== MEMBER PHOTO SECTION ========== */
         .member-photo-section {
             text-align: center;
             margin-bottom: 20px;
@@ -792,7 +1060,7 @@
             color: #ddd;
         }
         
-        /* PHOTO UPLOAD */
+        /* ========== PHOTO UPLOAD ========== */
         .photo-upload-section {
             background: #1a1a1a;
             padding: 25px;
@@ -907,7 +1175,7 @@
             color: #4CAF50;
         }
         
-        /* QUALITY SCORE */
+        /* ========== QUALITY SCORE ========== */
         .quality-score {
             display: flex;
             align-items: center;
@@ -953,7 +1221,7 @@
             min-width: 50px;
         }
         
-        /* MODALS */
+        /* ========== MODALS ========== */
         .modal {
             display: none;
             position: fixed;
@@ -1078,7 +1346,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         
-        /* TEAM PERFORMANCE GRAPH */
+        /* ========== TEAM PERFORMANCE GRAPH ========== */
         .team-graph-container {
             background: rgba(255, 255, 255, 0.03);
             border-radius: 12px;
@@ -1136,7 +1404,55 @@
             }
         }
         
-        /* FOOTER */
+        /* ========== QUICK ACTIONS ========== */
+        .quick-actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .quick-action-btn {
+            background: #1b5e20;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .quick-action-btn:hover {
+            transform: scale(1.1);
+            background: #2e7d32;
+        }
+        
+        .quick-action-btn.analytics {
+            background: #2196F3;
+        }
+        
+        .quick-action-btn.analytics:hover {
+            background: #42A5F5;
+        }
+        
+        .quick-action-btn.add {
+            background: #4CAF50;
+        }
+        
+        .quick-action-btn.add:hover {
+            background: #66BB6A;
+        }
+        
+        /* ========== FOOTER ========== */
         .footer {
             background: #0a0a0a;
             color: #888;
@@ -1146,7 +1462,7 @@
             border-top: 1px solid #333;
         }
         
-        /* RESPONSIVE */
+        /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -1175,13 +1491,21 @@
                 height: 150px;
             }
             
-            .table-section, .cards, .todo-list, .photo-upload-section {
+            .table-section, .cards, .todo-list, .photo-upload-section, .team-chat-section {
                 margin: 10px;
                 padding: 15px;
             }
             
             .cards {
                 grid-template-columns: 1fr;
+            }
+            
+            .chat-container {
+                height: 500px;
+            }
+            
+            .message {
+                max-width: 90%;
             }
             
             .photo-gallery {
@@ -1211,6 +1535,17 @@
             .detail-label {
                 width: 100px;
             }
+            
+            .quick-actions {
+                bottom: 10px;
+                right: 10px;
+            }
+            
+            .quick-action-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1219,9 +1554,13 @@
                 padding: 30px 20px;
             }
             
-            .login-container .logo-img {
+            .logo-img {
                 width: 100px;
                 height: 100px;
+            }
+            
+            .logo-emoji {
+                font-size: 50px;
             }
             
             .login-container h1 {
@@ -1255,6 +1594,21 @@
                 min-width: 70px;
                 padding: 8px 12px;
                 font-size: 12px;
+            }
+            
+            .chat-container {
+                height: 400px;
+            }
+            
+            .chat-input-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .chat-send-btn {
+                padding: 12px;
+                width: 100%;
+                justify-content: center;
             }
             
             table {
@@ -1351,12 +1705,18 @@
         </div>
     </div>
     
+    <!-- ANALYTICS MODAL (Dynamic) -->
+    
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="login-screen">
         <div class="login-container">
-            <!-- Logo - will show mushroom emoji if brl2.png not found -->
-            <img src="brl2.png" alt="Brokoons Logo" class="logo-img" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\\'font-size: 60px; color: #4caf50; margin-bottom: 20px;\\'>🍄</div>' + this.parentElement.innerHTML;">
-            <h1>Brokoons Dashboard</h1>
+            <!-- Fixed Logo Section -->
+            <div class="logo-container">
+                <img src="brl2.png" alt="Brokoons Logo" class="logo-img" 
+                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('logoEmoji').style.display='block';">
+                <div id="logoEmoji" class="logo-emoji">🍄</div>
+                <h1>Brokoons Dashboard</h1>
+            </div>
             
             <div class="login-form">
                 <input type="text" id="username" placeholder="Username" required>
@@ -1383,24 +1743,22 @@
                 <a href="#" onclick="showTab('stock')">Stock</a>
                 <a href="#" onclick="showTab('progress')">Updates</a>
                 <a href="#" onclick="showTab('team')">Team</a>
+                <a href="#" onclick="showTeamChat()" id="chatLink">💬 Chat</a>
                 <a href="#" onclick="logout()" style="color: #ff6b6b;">Logout</a>
             </nav>
         </header>
 
-        <!-- UPDATED HERO SECTION WITH ALL TITLES SAME SIZE -->
+        <!-- HERO SECTION -->
         <section class="hero">
             <div class="hero-text-container">
-                <!-- Sequence: 1. BROKOONS INTERNAL SYSTEM -->
                 <h1 class="hero-main-title">BROKOONS INTERNAL SYSTEM</h1>
-                <!-- Sequence: 2. Track Stock -->
                 <h1 class="hero-main-title">📦 TRACK STOCK</h1>
-                <!-- Sequence: 3. Track Updates -->
                 <h1 class="hero-main-title">📈 TRACK UPDATES</h1>
-                <!-- Sequence: 4. Track Team -->
                 <h1 class="hero-main-title">👥 TRACK TEAM</h1>
             </div>
         </section>
 
+        <!-- TABS -->
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
             <button class="tab-btn" onclick="showTab('stock')">📦 Stock</button>
@@ -1418,6 +1776,10 @@
                 <div class="card" onclick="showTab('progress')">
                     <h3>📊 Farm Progress</h3>
                     <p>Quality Score: <strong id="quality-score-value" style="color: #4caf50;">0/100</strong></p>
+                </div>
+                <div class="card" onclick="showTeamChat()">
+                    <h3>💬 Team Chat</h3>
+                    <p><strong id="unread-messages" style="color: #4caf50;">0</strong> new messages</p>
                 </div>
                 <div class="card" onclick="showTab('team')">
                     <h3>👥 Team Activity</h3>
@@ -1446,6 +1808,46 @@
             </div>
         </div>
 
+        <!-- TEAM CHAT SECTION -->
+        <div id="team-chat-section" class="team-chat-section">
+            <div class="chat-header">
+                <div>
+                    <div class="chat-title">💬 Team Chat Room</div>
+                    <div class="chat-subtitle">Real-time communication for all team members</div>
+                </div>
+                <button class="chat-close" onclick="hideTeamChat()">×</button>
+            </div>
+
+            <div class="online-users" id="onlineUsers">
+                <!-- Online users will be displayed here -->
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="no-messages" id="noMessages">
+                        <p>💬 Start the conversation!</p>
+                        <p style="font-size: 12px; margin-top: 10px; color: #666;">No messages yet. Send your first message!</p>
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typingIndicator">
+                    Someone is typing...
+                </div>
+
+                <div class="chat-input-container">
+                    <input type="text" 
+                           class="chat-input" 
+                           id="chatInput" 
+                           placeholder="Type your message here..."
+                           onkeypress="handleChatKeyPress(event)">
+                    <button class="chat-send-btn" id="sendButton" onclick="sendMessage()">
+                        <span>Send</span>
+                        <span>📤</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- STOCK TAB -->
         <div id="stock-tab" class="tab-content">
             <section class="cards">
@@ -1457,9 +1859,9 @@
                     <h3>⚠️ Low Stock Alert</h3>
                     <p id="low-stock-count" style="color: #ff9800;">0 items need attention</p>
                 </div>
-                <div class="card" onclick="exportData()">
-                    <h3>📊 Export Reports</h3>
-                    <p>Download inventory data</p>
+                <div class="card" onclick="exportAllData()">
+                    <h3>📥 Export Backup</h3>
+                    <p>Download all data as backup</p>
                 </div>
             </section>
 
@@ -1487,7 +1889,7 @@
             </div>
         </div>
 
-        <!-- PROGRESS TAB - UPDATED WITH IMPROVED TASK SYSTEM -->
+        <!-- PROGRESS TAB -->
         <div id="progress-tab" class="tab-content">
             <section class="cards">
                 <div class="card" onclick="showDailyReport()">
@@ -1516,27 +1918,23 @@
                     <input type="file" id="photoUpload" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload(event)">
                 </div>
                 
-                <!-- Upload Progress Bar -->
                 <div class="upload-progress" id="uploadProgress">
                     <div class="upload-progress-bar" id="uploadProgressBar"></div>
                 </div>
                 
-                <!-- Photo Count -->
                 <div class="photo-count">
                     <span id="photoCount">0</span> photos uploaded
                 </div>
                 
-                <!-- Photo Gallery -->
                 <div id="photoGallery" class="photo-gallery">
                     <!-- Photos will be loaded here -->
                 </div>
             </div>
 
-            <!-- UPDATED TO-DO LIST WITH SEPARATE COMPLETED SECTION -->
+            <!-- TO-DO LIST -->
             <div class="todo-list">
                 <h2 style="color: #4caf50; margin-bottom: 15px;">✅ Daily Task Checklist</h2>
                 
-                <!-- Task Progress Bar -->
                 <div class="task-progress">
                     <div class="progress-bar">
                         <div class="progress-fill" id="task-progress-fill"></div>
@@ -1544,7 +1942,6 @@
                     <div class="progress-text" id="task-progress-text">0/0 (0%)</div>
                 </div>
                 
-                <!-- Active Tasks Section -->
                 <div style="margin-bottom: 25px;">
                     <h3 style="color: #4caf50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                         <span>📝 Active Tasks</span>
@@ -1555,7 +1952,6 @@
                     </div>
                 </div>
                 
-                <!-- Completed Tasks Section -->
                 <div class="completed-tasks-section" id="completed-tasks-container" style="display: none;">
                     <h3 style="color: #4caf50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                         <span>✅ Completed Tasks</span>
@@ -1566,7 +1962,6 @@
                     </div>
                 </div>
                 
-                <!-- Add Task Button -->
                 <div style="text-align: center; margin-top: 20px;">
                     <button onclick="addTodoItem()" style="background: #1b5e20; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;">
                         <span style="font-size: 18px;">+</span> Add New Task
@@ -1631,9 +2026,13 @@
                     <h3>➕ Add Member</h3>
                     <p>Register new team members</p>
                 </div>
-                <div class="card" onclick="showTeamGraph()" id="teamGraphCard" style="display: none;">
+                <div class="card" onclick="showTeamGraph()" id="teamGraphCard">
                     <h3>📊 Team Graph</h3>
                     <p>View team performance</p>
+                </div>
+                <div class="card" onclick="showTeamChat()">
+                    <h3>💬 Team Chat</h3>
+                    <p>Real-time team communication</p>
                 </div>
                 <div class="card" onclick="showPerformance()">
                     <h3>⭐ Performance</h3>
@@ -1701,6 +2100,13 @@
             </div>
         </div>
 
+        <!-- QUICK ACTIONS -->
+        <div class="quick-actions">
+            <button class="quick-action-btn" onclick="exportAllData()" title="Export Backup">💾</button>
+            <button class="quick-action-btn analytics" onclick="showBusinessAnalytics()" title="Analytics">📊</button>
+            <button class="quick-action-btn add" onclick="addStockItem()" title="Add Stock">➕</button>
+        </div>
+
         <footer class="footer">
             <p>© 2026 Brokoons | Internal Use Only</p>
             <p style="font-size: 12px; color: #666;">Logged in as: <span id="currentUser">Guest</span></p>
@@ -1722,33 +2128,31 @@
         let currentTab = 'dashboard';
         let teamPerformanceChart = null;
         let currentMemberForPhoto = null;
+        let chatUnsubscribe = null;
+        let unreadMessages = 0;
+        let analyticsModal = null;
         
         // ========== DATA STORAGE ==========
         let teamMembers = [];
         let stockItems = [];
         let todoItems = [];
         let uploadedPhotos = [];
-        let memberPhotos = {}; // Store member photos separately
+        let memberPhotos = {};
         
         // ========== INITIALIZATION ==========
         function loadAllData() {
-            // Load team members
             const savedTeam = localStorage.getItem('brokoons_team_members');
             teamMembers = savedTeam ? JSON.parse(savedTeam) : getDefaultTeam();
             
-            // Load stock items
             const savedStock = localStorage.getItem('brokoons_stock_items');
             stockItems = savedStock ? JSON.parse(savedStock) : [];
             
-            // Load todo items
             const savedTodos = localStorage.getItem('brokoons_todo_items');
             todoItems = savedTodos ? JSON.parse(savedTodos) : getDefaultTodos();
             
-            // Load photos
             const savedPhotos = localStorage.getItem('brokoons_photos');
             uploadedPhotos = savedPhotos ? JSON.parse(savedPhotos) : [];
             
-            // Load member photos
             const savedMemberPhotos = localStorage.getItem('brokoons_member_photos');
             memberPhotos = savedMemberPhotos ? JSON.parse(savedMemberPhotos) : {};
         }
@@ -1866,7 +2270,6 @@
                 localStorage.setItem('brokoons_auth', 'true');
                 localStorage.setItem('brokoons_user', username);
                 
-                // Update team member status
                 const teamMember = teamMembers.find(member => 
                     member.name.toLowerCase().includes(username)
                 );
@@ -1878,12 +2281,18 @@
                 
                 showNotification('✅ Login Successful', `Welcome back, ${username}!`, 'success', 3000);
                 showMainSystem();
+                initializeChat();
             } else {
                 document.getElementById('loginError').style.display = 'block';
             }
         }
         
         function logout() {
+            if (chatUnsubscribe) {
+                chatUnsubscribe();
+                chatUnsubscribe = null;
+            }
+            
             if (currentUser) {
                 const teamMember = teamMembers.find(member => 
                     member.name.toLowerCase().includes(currentUser)
@@ -1917,18 +2326,13 @@
             document.getElementById('mainContent').style.display = 'block';
             document.getElementById('currentUser').textContent = currentUser;
             
-            // Initialize dashboard
-            updateStockTable();
-            updateInventoryTable();
-            updateTeamTable();
+            updateAllTables();
             updateTodoList();
             updatePhotoGallery();
             updatePhotoCount();
             
-            // Set current date
             document.getElementById('current-date').textContent = `Today: ${getCurrentDate()}`;
             
-            // Show dashboard tab
             showTab('dashboard');
             
             // Setup search
@@ -1944,53 +2348,215 @@
                 });
             }
             
-            // Show/Hide Team Graph card based on user role
-            updateTeamGraphVisibility();
+            // Setup notifications
+            setupNotifications();
         }
         
-        // ========== TAB MANAGEMENT ==========
-        function showTab(tabName) {
-            currentTab = tabName;
-            
-            // Hide all tabs
+        function updateAllTables() {
+            updateStockTable();
+            updateInventoryTable();
+            updateTeamTable();
+            updateOnlineCount();
+        }
+        
+        // ========== TEAM CHAT SYSTEM ==========
+        function showTeamChat() {
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Remove active from all buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Show selected tab
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            event.currentTarget.classList.add('active');
+            document.getElementById('team-chat-section').classList.add('active');
+            document.getElementById('chatLink').style.backgroundColor = 'rgba(27, 94, 32, 0.3)';
             
-            // Update tab content
-            if (tabName === 'dashboard') {
-                updateStockTable();
-                updateOnlineCount();
-            } else if (tabName === 'stock') {
-                updateInventoryTable();
-            } else if (tabName === 'progress') {
-                updateTodoList();
-                updatePhotoGallery();
-                updateTaskProgress();
-                updatePhotoCount();
-            } else if (tabName === 'team') {
-                updateTeamTable();
-                hideTeamGraph();
-                updateTeamGraphVisibility();
+            unreadMessages = 0;
+            updateUnreadCount();
+            
+            setTimeout(() => {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+        
+        function hideTeamChat() {
+            document.getElementById('team-chat-section').classList.remove('active');
+            document.getElementById('chatLink').style.backgroundColor = '';
+            showTab('dashboard');
+        }
+        
+        function initializeChat() {
+            if (!window.db || !window.firestore) {
+                console.log('Firebase not loaded yet, retrying in 1 second...');
+                setTimeout(initializeChat, 1000);
+                return;
+            }
+            
+            try {
+                const messagesRef = firestore.collection(db, 'teamChat');
+                const q = firestore.query(messagesRef, firestore.orderBy('timestamp', 'desc'));
+                
+                chatUnsubscribe = firestore.onSnapshot(q, (snapshot) => {
+                    const messages = [];
+                    snapshot.forEach((doc) => {
+                        messages.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    messages.sort((a, b) => a.timestamp - b.timestamp);
+                    
+                    updateChatMessages(messages);
+                    updateOnlineUsers();
+                    
+                    if (!document.getElementById('team-chat-section').classList.contains('active')) {
+                        unreadMessages = messages.length;
+                        updateUnreadCount();
+                    }
+                });
+                
+                console.log('✅ Chat initialized successfully');
+            } catch (error) {
+                console.error('Error initializing chat:', error);
             }
         }
         
-        // ========== UPDATE TEAM GRAPH VISIBILITY ==========
-        function updateTeamGraphVisibility() {
-            const teamGraphCard = document.getElementById('teamGraphCard');
-            if (currentUser === 'midhun') {
-                teamGraphCard.style.display = 'block';
+        function updateChatMessages(messages) {
+            const chatMessages = document.getElementById('chatMessages');
+            const noMessages = document.getElementById('noMessages');
+            
+            if (messages.length === 0) {
+                noMessages.style.display = 'block';
+                chatMessages.innerHTML = '';
+                return;
+            }
+            
+            noMessages.style.display = 'none';
+            
+            let html = '';
+            messages.forEach(message => {
+                const isOwnMessage = message.senderId === currentUser;
+                const messageClass = isOwnMessage ? 'message sent' : 'message received';
+                const time = formatTime(message.timestamp);
+                
+                html += `
+                    <div class="${messageClass}">
+                        <div class="message-header">
+                            <span class="message-sender">${message.sender}</span>
+                            <span class="message-time">${time}</span>
+                        </div>
+                        <div class="message-content">${message.text}</div>
+                        ${isOwnMessage ? `
+                            <div class="message-status">
+                                <span>✅</span>
+                                <span>Delivered</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            chatMessages.innerHTML = html;
+            
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            const button = document.getElementById('sendButton');
+            
+            if (!message || !currentUser || !window.db) {
+                showNotification('⚠️ Error', 'Chat not available. Please refresh.', 'error', 3000);
+                return;
+            }
+            
+            button.disabled = true;
+            const originalMessage = message;
+            input.value = '';
+            
+            try {
+                // Get current user's full name
+                const userMember = teamMembers.find(m => 
+                    m.name.toLowerCase().includes(currentUser)
+                );
+                const displayName = userMember ? userMember.name : currentUser;
+                
+                // Send to Firebase
+                await window.firestore.addDoc(window.firestore.collection(window.db, 'teamChat'), {
+                    sender: displayName,
+                    senderId: currentUser,
+                    text: originalMessage,
+                    timestamp: Date.now(),
+                    date: getCurrentDate(),
+                    status: 'sent'
+                });
+                
+                showNotification('💬 Sent', 'Message delivered', 'success', 2000);
+                
+                const teamMember = teamMembers.find(member => 
+                    member.name.toLowerCase().includes(currentUser)
+                );
+                if (teamMember) {
+                    teamMember.lastOnline = Date.now();
+                    saveAllData();
+                }
+                
+            } catch (error) {
+                console.error('Chat error:', error);
+                input.value = originalMessage;
+                showNotification('❌ Failed', 'Message not sent. Try again.', 'error', 3000);
+            } finally {
+                button.disabled = false;
+                input.focus();
+            }
+        }
+        
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        function updateOnlineUsers() {
+            const onlineUsersDiv = document.getElementById('onlineUsers');
+            const onlineMembers = teamMembers.filter(member => 
+                member.status === 'online' || 
+                (member.lastOnline && Date.now() - member.lastOnline < 300000)
+            );
+            
+            if (onlineMembers.length === 0) {
+                onlineUsersDiv.innerHTML = '<div style="color: #888; padding: 10px;">No members online</div>';
+                return;
+            }
+            
+            let html = '';
+            onlineMembers.forEach(member => {
+                const isCurrentUser = member.name.toLowerCase().includes(currentUser);
+                html += `
+                    <div class="online-user">
+                        <div class="online-indicator"></div>
+                        <span>${member.name}${isCurrentUser ? ' (You)' : ''}</span>
+                    </div>
+                `;
+            });
+            
+            onlineUsersDiv.innerHTML = html;
+        }
+        
+        function updateUnreadCount() {
+            const unreadElement = document.getElementById('unread-messages');
+            const chatLink = document.getElementById('chatLink');
+            
+            if (unreadMessages > 0) {
+                unreadElement.textContent = unreadMessages;
+                chatLink.innerHTML = '💬 Chat <span style="background: #f44336; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; margin-left: 5px;">' + unreadMessages + '</span>';
             } else {
-                teamGraphCard.style.display = 'none';
+                unreadElement.textContent = '0';
+                chatLink.innerHTML = '💬 Chat';
             }
         }
         
@@ -2044,66 +2610,75 @@
             }
         }
         
-        // ========== MEMBER PHOTO UPLOAD ==========
-        function uploadMemberPhoto(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            if (file.size > 5 * 1024 * 1024) {
-                showNotification('⚠️ File Too Large', 'Photo exceeds 5MB limit.', 'warning', 4000);
-                return;
-            }
-            
-            if (!currentMemberForPhoto) {
-                showNotification('⚠️ Error', 'No member selected for photo upload.', 'error', 4000);
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Store the photo in memberPhotos object
-                memberPhotos[currentMemberForPhoto] = e.target.result;
-                saveAllData();
-                
-                // Update the displayed photo
-                document.getElementById('modalMemberPhoto').src = e.target.result;
-                
-                showNotification('📸 Photo Uploaded', `Photo updated for ${currentMemberForPhoto}`, 'success', 3000);
-            };
-            reader.readAsDataURL(file);
-            
-            // Reset the file input
-            event.target.value = '';
-        }
-        
-        function getMemberPhoto(memberName) {
-            if (memberPhotos[memberName]) {
-                return memberPhotos[memberName];
-            } else {
-                // Create default initials image
-                const initials = memberName.split(' ').map(n => n[0]).join('').toUpperCase();
-                return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#222"/><text x="50" y="60" text-anchor="middle" fill="#4caf50" font-size="40">${initials}</text></svg>`;
+        function setupNotifications() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        showNotification('🔔 Notifications Enabled', 
+                            'You will receive updates from the team.', 'success');
+                    }
+                });
             }
         }
         
-        // ========== TEAM PERFORMANCE GRAPH ==========
+        function showPushNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: body,
+                    icon: 'brl2.png',
+                    badge: 'brl2.png'
+                });
+            }
+        }
+        
+        // ========== TAB MANAGEMENT ==========
+        function showTab(tabName) {
+            currentTab = tabName;
+            
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            document.getElementById('team-chat-section').classList.remove('active');
+            document.getElementById('chatLink').style.backgroundColor = '';
+            
+            if (tabName === 'dashboard') {
+                updateStockTable();
+                updateOnlineCount();
+            } else if (tabName === 'stock') {
+                updateInventoryTable();
+            } else if (tabName === 'progress') {
+                updateTodoList();
+                updatePhotoGallery();
+                updateTaskProgress();
+                updatePhotoCount();
+            } else if (tabName === 'team') {
+                updateTeamTable();
+                hideTeamGraph();
+            }
+        }
+        
+        // ========== TEAM GRAPH FUNCTIONS ==========
         function showTeamGraph() {
-            // Only founder can access the graph
             if (currentUser !== 'midhun') {
                 showNotification('⛔ Access Denied', 'Only founder can view team performance graph.', 'error', 4000);
                 return;
             }
             
-            // Hide list, show graph
             document.getElementById('team-list-section').style.display = 'none';
             document.getElementById('team-graph-section').style.display = 'block';
             
-            // Initialize or update chart
             initTeamPerformanceChart();
         }
         
         function hideTeamGraph() {
-            // Show list, hide graph
             document.getElementById('team-list-section').style.display = 'block';
             document.getElementById('team-graph-section').style.display = 'none';
         }
@@ -2111,21 +2686,17 @@
         function initTeamPerformanceChart() {
             const ctx = document.getElementById('teamPerformanceChart').getContext('2d');
             
-            // Destroy existing chart if exists
             if (teamPerformanceChart) {
                 teamPerformanceChart.destroy();
             }
             
-            // Sample data for 6 days
             const performanceData = [90, 98, 84, 92, 88, 95];
             const days = ['Day 01', 'Day 02', 'Day 03', 'Day 04', 'Day 05', 'Day 06'];
             
-            // Create gradient for bars
             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
             gradient.addColorStop(0, 'rgba(76, 175, 80, 0.8)');
             gradient.addColorStop(1, 'rgba(76, 175, 80, 0.2)');
             
-            // Create chart
             teamPerformanceChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -2355,11 +2926,6 @@
             }
         }
         
-        function exportData() {
-            alert("Export feature coming soon!");
-            showNotification('📊 Export Started', 'Data export will be available soon.', 'info', 3000);
-        }
-        
         // ========== TEAM MANAGEMENT ==========
         function updateTeamTable() {
             const tbody = document.getElementById('team-table');
@@ -2396,6 +2962,7 @@
             updateOnlineCount();
             document.getElementById('total-members').textContent = teamMembers.length;
             document.getElementById('addMemberBtn').style.display = currentUser === 'midhun' ? 'block' : 'none';
+            document.getElementById('teamGraphCard').style.display = currentUser === 'midhun' ? 'block' : 'none';
         }
         
         function updateOnlineCount() {
@@ -2407,7 +2974,6 @@
             const member = teamMembers.find(m => m.name === memberName);
             if (!member) return;
             
-            // Founder can toggle anyone, others only themselves
             const userMember = teamMembers.find(m => 
                 m.name.toLowerCase().includes(currentUser)
             );
@@ -2445,10 +3011,8 @@
             document.getElementById('modalMemberPerformance').textContent = member.performance || "90%";
             document.getElementById('modalMemberDetails').textContent = member.details || "No additional details.";
             
-            // Load member photo or use default
             document.getElementById('modalMemberPhoto').src = getMemberPhoto(memberName);
             
-            // Show upload button only for founder
             document.getElementById('uploadPhotoBtn').style.display = currentUser === 'midhun' ? 'block' : 'none';
             document.getElementById('memberModal').style.display = 'flex';
         }
@@ -2497,7 +3061,6 @@
             
             teamMembers = teamMembers.filter(m => m.name !== memberName);
             
-            // Also remove their photo if exists
             if (memberPhotos[memberName]) {
                 delete memberPhotos[memberName];
             }
@@ -2549,7 +3112,44 @@
             alert(message);
         }
         
-        // ========== UPDATED TASK MANAGEMENT ==========
+        function getMemberPhoto(memberName) {
+            if (memberPhotos[memberName]) {
+                return memberPhotos[memberName];
+            } else {
+                const initials = memberName.split(' ').map(n => n[0]).join('').toUpperCase();
+                return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#222"/><text x="50" y="60" text-anchor="middle" fill="#4caf50" font-size="40">${initials}</text></svg>`;
+            }
+        }
+        
+        function uploadMemberPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('⚠️ File Too Large', 'Photo exceeds 5MB limit.', 'warning', 4000);
+                return;
+            }
+            
+            if (!currentMemberForPhoto) {
+                showNotification('⚠️ Error', 'No member selected for photo upload.', 'error', 4000);
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                memberPhotos[currentMemberForPhoto] = e.target.result;
+                saveAllData();
+                
+                document.getElementById('modalMemberPhoto').src = e.target.result;
+                
+                showNotification('📸 Photo Uploaded', `Photo updated for ${currentMemberForPhoto}`, 'success', 3000);
+            };
+            reader.readAsDataURL(file);
+            
+            event.target.value = '';
+        }
+        
+        // ========== TASK MANAGEMENT ==========
         function updateTodo(id, completed) {
             const item = todoItems.find(t => t.id === id);
             if (item) {
@@ -2561,7 +3161,6 @@
                 if (completed) {
                     showNotification('✅ Task Completed', `"${item.text}" marked as completed.`, 'success', 3000);
                     
-                    // Check if all tasks are completed
                     const allCompleted = todoItems.length > 0 && todoItems.every(t => t.completed);
                     if (allCompleted) {
                         showNotification('🎉 All Tasks Done!', 'All tasks completed! Time to add new ones.', 'success', 4000);
@@ -2577,18 +3176,15 @@
             const completedContainer = document.getElementById('completed-list-container');
             const completedSection = document.getElementById('completed-tasks-container');
             
-            // Separate active and completed tasks
             const activeTasks = todoItems.filter(t => !t.completed);
             const completedTasks = todoItems.filter(t => t.completed);
             
-            // Sort by creation date (newest first)
             activeTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             completedTasks.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
             
             let activeHtml = '';
             let completedHtml = '';
             
-            // Render active tasks
             activeTasks.forEach(item => {
                 const date = new Date(item.createdAt);
                 const dateStr = date.toLocaleDateString('en-US', { 
@@ -2611,7 +3207,6 @@
                 `;
             });
             
-            // Render completed tasks
             completedTasks.forEach(item => {
                 const createdDate = new Date(item.createdAt);
                 const completedDate = new Date(item.completedAt);
@@ -2639,18 +3234,15 @@
                 `;
             });
             
-            // Update containers
             container.innerHTML = activeHtml || '<p style="color: #888; text-align: center; padding: 20px;">No active tasks. Add a new task!</p>';
             completedContainer.innerHTML = completedHtml || '<p style="color: #888; text-align: center; padding: 20px;">No completed tasks yet.</p>';
             
-            // Show/hide completed section
             if (completedTasks.length > 0) {
                 completedSection.style.display = 'block';
             } else {
                 completedSection.style.display = 'none';
             }
             
-            // Update counts
             document.getElementById('active-count').textContent = activeTasks.length;
             document.getElementById('completed-count').textContent = completedTasks.length;
             
@@ -2910,10 +3502,216 @@
             alert(`📆 Farm Schedule\n\n• Monday: Watering, Temperature check\n• Tuesday: Spore collection, Cleaning\n• Wednesday: Watering, Pest check\n• Thursday: New batch setup\n• Friday: Weekly report, Maintenance`);
         }
         
+        // ========== ANALYTICS DASHBOARD ==========
+        function showBusinessAnalytics() {
+            if (currentUser !== 'midhun') {
+                showNotification('⛔ Founder Only', 'Analytics available only to founder', 'error');
+                return;
+            }
+            
+            // Remove existing modal if any
+            if (analyticsModal) {
+                analyticsModal.remove();
+            }
+            
+            const analyticsHtml = `
+                <div class="modal" id="analyticsModal" style="display: flex;">
+                    <div class="modal-content" style="max-width: 800px;">
+                        <div class="modal-header">
+                            <h2 class="modal-title">📊 Business Analytics</h2>
+                            <button class="modal-close" onclick="document.getElementById('analyticsModal').style.display='none'">×</button>
+                        </div>
+                        
+                        <div class="stats-grid" style="margin: 20px 0;">
+                            <div class="stat-card">
+                                <div class="stat-value">${stockItems.length}</div>
+                                <div class="stat-label">Stock Items</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${teamMembers.length}</div>
+                                <div class="stat-label">Team Members</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${todoItems.filter(t => !t.completed).length}</div>
+                                <div class="stat-label">Active Tasks</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${uploadedPhotos.length}</div>
+                                <div class="stat-label">Photos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="table-section" style="margin: 10px;">
+                            <h3>📈 Monthly Activity</h3>
+                            <canvas id="analyticsChart" height="200"></canvas>
+                        </div>
+                        
+                        <div class="table-section" style="margin: 10px;">
+                            <h3>👥 Team Performance</h3>
+                            <div style="overflow-x: auto;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Member</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Performance</th>
+                                            <th>Last Active</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${teamMembers.map(member => `
+                                            <tr>
+                                                <td>${member.name}</td>
+                                                <td>${member.role}</td>
+                                                <td><span class="badge ${member.status === 'online' ? 'badge-success' : 'badge-offline'}">${member.status}</span></td>
+                                                <td>${member.performance || 'N/A'}</td>
+                                                <td>${member.lastOnline ? getTimeAgo(member.lastOnline) : 'Never'}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button onclick="exportAllData()" class="btn btn-edit" style="padding: 10px 20px;">💾 Export All Data</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', analyticsHtml);
+            analyticsModal = document.getElementById('analyticsModal');
+            
+            // Initialize analytics chart
+            setTimeout(() => initAnalyticsChart(), 100);
+        }
+        
+        function initAnalyticsChart() {
+            const ctx = document.getElementById('analyticsChart');
+            if (!ctx) return;
+            
+            new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Productivity',
+                        data: [85, 92, 88, 95],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 70,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+        
+        // ========== DATA EXPORT/IMPORT ==========
+        function exportAllData() {
+            const data = {
+                teamMembers,
+                stockItems,
+                todoItems,
+                uploadedPhotos,
+                memberPhotos,
+                exportedAt: new Date().toISOString(),
+                exportedBy: currentUser
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `brokoons-backup-${getCurrentDate()}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('📥 Backup Created', 'All data exported successfully', 'success');
+        }
+        
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        if (confirm(`Import data from ${data.exportedAt || 'backup'}?`)) {
+                            if (data.teamMembers) teamMembers = data.teamMembers;
+                            if (data.stockItems) stockItems = data.stockItems;
+                            if (data.todoItems) todoItems = data.todoItems;
+                            if (data.uploadedPhotos) uploadedPhotos = data.uploadedPhotos;
+                            if (data.memberPhotos) memberPhotos = data.memberPhotos;
+                            
+                            saveAllData();
+                            updateAllTables();
+                            
+                            showNotification('📤 Import Complete', 'Data restored from backup', 'success');
+                        }
+                    } catch (error) {
+                        showNotification('❌ Import Failed', 'Invalid backup file', 'error');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+        
         // ========== UTILITY FUNCTIONS ==========
         function getCurrentDate() {
             const now = new Date();
             return `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+        }
+        
+        function formatTime(timestamp) {
+            if (!timestamp) return 'Just now';
+            
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Just now';
+            
+            if (date.toDateString() === now.toDateString()) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            if (date.toDateString() === yesterday.toDateString()) {
+                return 'Yesterday ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + 
+                   date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
         
         function formatFileSize(bytes) {
@@ -2936,6 +3734,80 @@
             return `${days}d ago`;
         }
         
+        // ========== PWA INSTALLATION ==========
+        let installPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.installPrompt = e;
+            
+            showInstallNotification();
+        });
+        
+        function showInstallNotification() {
+            const installNotification = showNotification(
+                '📱 Install Brokoons App',
+                'Install this app on your device for quick access!',
+                'info',
+                10000
+            );
+            
+            setTimeout(() => {
+                const installBtn = document.createElement('button');
+                installBtn.textContent = 'Install Now';
+                installBtn.style.cssText = 'margin-left: 10px; padding: 5px 10px; background: #1b5e20; color: white; border: none; border-radius: 3px; cursor: pointer;';
+                
+                installBtn.onclick = () => {
+                    if (window.installPrompt) {
+                        window.installPrompt.prompt();
+                    }
+                };
+                
+                const notification = document.querySelector('.notification:last-child');
+                if (notification) {
+                    notification.appendChild(installBtn);
+                }
+            }, 500);
+        }
+        
+        // ========== SERVICE WORKER REGISTRATION ==========
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Create a simple service worker
+                const swContent = `
+                    const CACHE_NAME = 'brokoons-v1';
+                    const urlsToCache = [
+                        '/',
+                        '/index.html',
+                        '/manifest.json'
+                    ];
+
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(cache => cache.addAll(urlsToCache))
+                        );
+                    });
+
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(response => response || fetch(event.request))
+                        );
+                    });
+                `;
+                
+                // Register service worker
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('✅ ServiceWorker registered');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+        
         // ========== INITIALIZE APP ==========
         document.addEventListener('DOMContentLoaded', function() {
             loadAllData();
@@ -2946,6 +3818,7 @@
                 if (savedUser && TEAM_USERS[savedUser]) {
                     currentUser = savedUser;
                     showMainSystem();
+                    setTimeout(initializeChat, 2000);
                     return;
                 }
             }
@@ -2961,142 +3834,14 @@
         document.getElementById('photoPreviewModal').addEventListener('click', function(event) {
             if (event.target === this) closePhotoPreview();
         });
-            // ========== PWA INSTALLATION ==========
-let deferredPrompt;
-
-// Make installPrompt globally available
-let installPrompt;
-
-// Listen for install prompt
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  window.installPrompt = e;  // Store globally
-  
-  // Show your notification
-  showInstallNotification();
-});
-
-// Function to show install notification
-function showInstallNotification() {
-  const installNotification = showNotification(
-    '📱 Install Brokoons App',
-    'Install this app on your device for quick access!',
-    'info',
-    10000
-  );
-  
-  // Add install button to the notification
-  setTimeout(() => {
-    const installBtn = document.createElement('button');
-    installBtn.textContent = 'Install Now';
-    installBtn.style.cssText = 'margin-left: 10px; padding: 5px 10px; background: #1b5e20; color: white; border: none; border-radius: 3px; cursor: pointer;';
-    
-    installBtn.onclick = () => {
-      if (window.installPrompt) {
-        window.installPrompt.prompt();
-      }
-    };
-    
-    // Find the notification and add button
-    const notification = document.querySelector('.notification:last-child');
-    if (notification) {
-      notification.appendChild(installBtn);
-    }
-  }, 500);
-}
-
-// Install function
-function installApp() {
-  if (!deferredPrompt) {
-    return;
-  }
-  
-  // Show the install prompt
-  deferredPrompt.prompt();
-  
-  // Wait for the user to respond to the prompt
-  deferredPrompt.userChoice.then((choiceResult) => {
-    if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-      showNotification('✅ Installed', 'App installed successfully!', 'success', 3000);
-    } else {
-      console.log('User dismissed the install prompt');
-    }
-    deferredPrompt = null;
-  });
-}
-
-// Register Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      })
-      .catch(err => {
-        console.log('ServiceWorker registration failed: ', err);
-      });
-  });
-}
-
-// Detect if app is running in standalone mode
-function isRunningStandalone() {
-  return window.matchMedia('(display-mode: standalone)').matches || 
-         window.navigator.standalone === true;
-}
-
-// Check on load
-if (isRunningStandalone()) {
-  console.log('App is running in standalone mode');
-}
+        
+        // Add click handler for analytics modal
+        document.addEventListener('click', function(event) {
+            const analyticsModal = document.getElementById('analyticsModal');
+            if (analyticsModal && event.target === analyticsModal) {
+                analyticsModal.style.display = 'none';
+            }
+        });
     </script>
- <script type="module">
-  // Import Firebase modules
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-
-  // Your Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyB_1_LBzjC_48KpMcA3UeqnKXqWPdZuprw",
-    authDomain: "brokoons-dashboard.firebaseapp.com",
-    projectId: "brokoons-dashboard",
-    storageBucket: "brokoons-dashboard.firebasestorage.app",
-    messagingSenderId: "968593995876",
-    appId: "1:968593995876:web:4a399fbdf0874f4e8a4771"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);  // Database
-  const auth = getAuth(app);     // Authentication
-
-  // Make available globally
-  window.firebaseApp = app;
-  window.db = db;
-  window.auth = auth;
-
-  console.log("✅ Firebase loaded! Database & Auth ready.");
-</script>
-<script>
-let installPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  installPrompt = e;
-  
-  // Show install button
-  const installBtn = document.getElementById('install-btn');
-  if (installBtn) {
-    installBtn.style.display = 'block';
-    installBtn.onclick = () => {
-      installPrompt.prompt();
-      installPrompt.userChoice.then(() => {
-        installPrompt = null;
-      });
-    };
-  }
-});
-</script>
 </body>
 </html>
