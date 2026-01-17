@@ -72,18 +72,34 @@ app.get('/api/stats', (req, res) => {
     res.json(mockData.stats);
 });
 
-// Login endpoint
+// Login endpoint - ADD MORE USERS
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     
-    if (username === 'midhun' && password === '1977') {
+    // Team credentials (same as frontend)
+    const TEAM_USERS = {
+        "midhun": "1977",
+        "akash": "2024", 
+        "sajad": "5550",
+        "saran": "2244",
+        "muhammad": "1415"
+    };
+    
+    if (TEAM_USERS[username] && TEAM_USERS[username] === password) {
         res.json({
             success: true,
-            user: { id: 1, name: 'midhun', role: 'admin' },
+            user: {
+                id: 1,
+                name: username,
+                role: username === 'midhun' ? 'admin' : 'user'
+            },
             token: 'mock-jwt-token-12345'
         });
     } else {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
+        res.status(401).json({ 
+            success: false, 
+            message: 'Invalid credentials. Try: midhun/1977, akash/2024, etc.' 
+        });
     }
 });
 
@@ -131,4 +147,21 @@ app.listen(PORT, () => {
     console.log('🔥 NO FIRESTORE REQUIRED - Using mock data');
     console.log('🔥 READY FOR RENDER DEPLOYMENT');
     console.log('============================================================');
+    
+    // ====================================
+    // KEEP-ALIVE PING - ADD HERE (AFTER SERVER STARTS)
+    // ====================================
+    const fetch = require('node-fetch');
+    
+    // Ping immediately to wake up
+    fetch('https://brokoons-backend.onrender.com/api/test')
+        .then(() => console.log('✅ Initial keep-alive ping successful'))
+        .catch(err => console.log('⚠️ Initial ping failed (normal on first start):', err.message));
+    
+    // Schedule regular pings
+    setInterval(() => {
+        fetch('https://brokoons-backend.onrender.com/api/test')
+            .then(() => console.log('🔄 Keep-alive ping successful'))
+            .catch(err => console.log('⚠️ Keep-alive ping failed:', err.message));
+    }, 300000); // Every 5 minutes
 });
