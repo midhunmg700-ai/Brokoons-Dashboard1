@@ -2,9 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// Fix CORS
+// Fix CORS - Allow all origins for production
 app.use(cors({
-    origin: ['http://127.0.0.1:5500', 'http://localhost:5500'],
+    origin: '*',  // Allow all origins in production
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
 
@@ -85,20 +87,37 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// Health check
+// Health check (REQUIRED for Render)
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'healthy',
         server: 'Brokoons Backend',
         version: '1.0.0',
-        data: 'Using mock data - No Firestore required'
+        data: 'Using mock data - No Firestore required',
+        time: new Date().toISOString()
+    });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Brokoons Backend API',
+        endpoints: {
+            test: '/api/test',
+            tasks: '/api/tasks',
+            stats: '/api/stats',
+            chats: '/api/chats',
+            photos: '/api/photos',
+            login: '/api/login (POST)',
+            health: '/health'
+        }
     });
 });
 
 // ========================
 // START SERVER
 // ========================
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log('============================================================');
     console.log('🚀 BROKOONS BACKEND SERVER STARTED (MOCK DATA VERSION)');
@@ -107,7 +126,9 @@ app.listen(PORT, () => {
     console.log(`✅ Test: http://localhost:${PORT}/api/test`);
     console.log(`💬 Chats: http://localhost:${PORT}/api/chats`);
     console.log(`✅ Tasks: http://localhost:${PORT}/api/tasks`);
+    console.log(`❤️  Health: http://localhost:${PORT}/health`);
     console.log('============================================================');
     console.log('🔥 NO FIRESTORE REQUIRED - Using mock data');
+    console.log('🔥 READY FOR RENDER DEPLOYMENT');
     console.log('============================================================');
 });
