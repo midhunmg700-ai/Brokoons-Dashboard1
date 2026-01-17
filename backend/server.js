@@ -72,7 +72,11 @@ app.get('/api/stats', (req, res) => {
     res.json(mockData.stats);
 });
 
+<<<<<<< HEAD
 // Login endpoint - ADD MORE USERS
+=======
+// Login endpoint - ALL TEAM MEMBERS
+>>>>>>> 545c25a762b6fc0e6a851085c4e0004cb2542908
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     
@@ -149,7 +153,11 @@ app.listen(PORT, () => {
     console.log('============================================================');
     
     // ====================================
+<<<<<<< HEAD
     // KEEP-ALIVE PING - ADD HERE (AFTER SERVER STARTS)
+=======
+    // KEEP-ALIVE PING - STARTS AFTER SERVER
+>>>>>>> 545c25a762b6fc0e6a851085c4e0004cb2542908
     // ====================================
     const fetch = require('node-fetch');
     
@@ -164,4 +172,8 @@ app.listen(PORT, () => {
             .then(() => console.log('🔄 Keep-alive ping successful'))
             .catch(err => console.log('⚠️ Keep-alive ping failed:', err.message));
     }, 300000); // Every 5 minutes
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 545c25a762b6fc0e6a851085c4e0004cb2542908

@@ -2119,8 +2119,7 @@
     <!-- ========== JAVASCRIPT ========== -->
     <script>
         // ========== CONFIGURATION ==========
-        const API_URL = 'http://localhost:3000';
-        
+       const API_URL = 'https://brokoons-backend.onrender.com';
         const TEAM_USERS = {
             "midhun": "1977",
             "akash": "2024", 
@@ -4062,11 +4061,12 @@ console.log('=== DASHBOARD DEBUG MODE ===');
 // Test all API endpoints
 async function testAllEndpoints() {
     const endpoints = [
-        { name: 'Tasks', url: 'http://localhost:3000/api/tasks' },
-        { name: 'Stats', url: 'http://localhost:3000/api/stats' },
-        { name: 'Chats', url: 'http://localhost:3000/api/chats' },
-        { name: 'Test', url: 'http://localhost:3000/api/test' }
-    ];
+   const endpoints = [
+    { name: 'Tasks', url: `${API_URL}/api/tasks` },
+    { name: 'Stats', url: `${API_URL}/api/stats` },
+    { name: 'Chats', url: `${API_URL}/api/chats` },
+    { name: 'Test', url: `${API_URL}/api/test` }
+];
 
     for (let endpoint of endpoints) {
         try {
@@ -4083,7 +4083,7 @@ async function testAllEndpoints() {
 async function testLogin() {
     console.log('Testing login...');
     try {
-        const response = await fetch('http://localhost:3000/api/login', {
+        const response = await fetch(`${API_URL}/api/login`,  {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: 'midhun', password: '1977' })
@@ -4103,4 +4103,6 @@ setTimeout(() => {
 }, 1000);
 </script>
 </body>
+
 </html>
+
