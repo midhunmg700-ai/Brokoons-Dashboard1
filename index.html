@@ -4098,7 +4098,7 @@ async function testLogin() {
         console.error('❌ Login failed:', error);
     }
 }
-
+window.testLogin = testLogin;
 // Run tests when page loads
 setTimeout(() => {
     console.log('Running connection tests...');
@@ -4109,5 +4109,6 @@ setTimeout(() => {
 </body>
 
 </html>
+
 
 
