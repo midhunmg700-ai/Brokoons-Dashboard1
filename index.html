@@ -1708,28 +1708,56 @@
     <!-- ANALYTICS MODAL (Dynamic) -->
     
     <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="login-screen">
-        <div class="login-container">
-            <!-- Fixed Logo Section -->
-            <div class="logo-container">
-                <img src="brl2.png" alt="Brokoons Logo" class="logo-img" 
-                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('logoEmoji').style.display='block';">
-                <div id="logoEmoji" class="logo-emoji">🍄</div>
-                <h1>Brokoons Dashboard</h1>
-            </div>
-            
-            <div class="login-form">
-                <input type="text" id="username" placeholder="Username" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button class="login-btn" onclick="login()">Login</button>
-                <div id="loginError" class="error-message">Invalid username or password</div>
-            </div>
-            
+    <div class="login-form">
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+
+   
+
+   <!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-container">
+
+        <!-- Fixed Logo Section -->
+        <div class="logo-container">
+            <img src="brl2.png" alt="Brokoons Logo">
+            <h1>Brokoons Dashboard</h1>
+        </div>
+
+       button class="login-btn" onclick="login()">Login</button>
+
+   <!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-container">
+
+        <!-- Fixed Logo Section -->
+        <div class="logo-container">
+            <img src="brl2.png" alt="Brokoons Logo">
+            <h1>Brokoons Dashboard</h1>
+        </div>
+
+        <div class="login-form">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+
+            <button class="login-btn" onclick="login()">Login</button>
+
+            <!-- TEMP TEST BUTTON -->
+            <button onclick="testLogin()" style="margin-top:10px;">
+                Test Backend Login
+            </button>
+
             <div class="footer-text">
                 © 2026 Brokoons. Internal use only.
             </div>
         </div>
+
     </div>
+</div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="mainContent" class="main-content" style="display: none;">
+        <header class="header">
 
     <!-- MAIN DASHBOARD -->
     <div id="mainContent" class="main-content" style="display: none;">
@@ -4109,6 +4137,7 @@ setTimeout(() => {
 </body>
 
 </html>
+
 
 
 
