@@ -36,7 +36,6 @@ let stockCollection;
 async function connectDB() {
   const client = new MongoClient(MONGO_URI);
   await client.connect();
-  const db = client.db("brokoons");
   stockCollection = db.collection("stock");
   console.log("✅ MongoDB connected");
 }
