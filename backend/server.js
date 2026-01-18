@@ -121,3 +121,33 @@ app.listen(PORT, () => {
             .catch(err => console.log('⚠️ Ping failed:', err.message));
     }, 300000);
 });
+let stockItems = []; // shared for everyone
+
+app.get('/api/stock', (req, res) => {
+  res.json(stockItems);
+});
+
+app.post('/api/stock', (req, res) => {
+  const item = req.body;
+  stockItems.unshift(item);
+  res.json({ success: true, stockItems });
+});
+
+app.put('/api/stock/:name', (req, res) => {
+  const { name } = req.params;
+  const { quantity, status } = req.body;
+
+  const item = stockItems.find(i => i.name === name);
+  if (item) {
+    item.quantity = quantity;
+    item.status = status;
+    item.lastUpdated = new Date().toISOString();
+  }
+
+  res.json({ success: true, stockItems });
+});
+
+app.delete('/api/stock/:name', (req, res) => {
+  stockItems = stockItems.filter(i => i.name !== req.params.name);
+  res.json({ success: true, stockItems });
+});
