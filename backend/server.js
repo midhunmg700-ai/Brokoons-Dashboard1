@@ -16,7 +16,7 @@ app.use(cors({
 app.use(express.json());
 
 // ========================
-// USERS (LOGIN)
+// USERS
 // ========================
 const TEAM_USERS = {
     midhun: "1977",
@@ -27,17 +27,13 @@ const TEAM_USERS = {
 };
 
 // ========================
-// SHARED DATA (VISIBLE TO ALL USERS)
+// SHARED DATA (FOR EVERYONE)
 // ========================
-let stockItems = [];     // ✅ shared stock
-let tasks = [];          // (for later)
-let chats = [];          // (for later)
+let stockItems = [];
 
 // ========================
-// API ROUTES
+// ROUTES
 // ========================
-
-// Test route
 app.get('/api/test', (req, res) => {
     res.json({
         status: '✅ Backend Working!',
@@ -45,7 +41,6 @@ app.get('/api/test', (req, res) => {
     });
 });
 
-// Login
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -65,16 +60,11 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// ========================
-// STOCK (SHARED FOR EVERYONE)
-// ========================
-
-// Get all stock
+// ===== STOCK (SHARED) =====
 app.get('/api/stock', (req, res) => {
     res.json(stockItems);
 });
 
-// Add stock
 app.post('/api/stock', (req, res) => {
     const item = {
         ...req.body,
@@ -84,7 +74,6 @@ app.post('/api/stock', (req, res) => {
     res.json({ success: true, stockItems });
 });
 
-// Update stock
 app.put('/api/stock/:name', (req, res) => {
     const { name } = req.params;
     const { quantity, status } = req.body;
@@ -99,25 +88,9 @@ app.put('/api/stock/:name', (req, res) => {
     res.json({ success: true, stockItems });
 });
 
-// Delete stock
 app.delete('/api/stock/:name', (req, res) => {
     stockItems = stockItems.filter(i => i.name !== req.params.name);
     res.json({ success: true, stockItems });
-});
-
-// ========================
-// HEALTH
-// ========================
-app.get('/health', (req, res) => {
-    res.json({ status: 'healthy' });
-});
-
-// Root
-app.get('/', (req, res) => {
-    res.json({
-        message: 'Brokoons Backend API',
-        endpoints: ['/api/test', '/api/login', '/api/stock']
-    });
 });
 
 // ========================
@@ -128,7 +101,6 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
 
-    // keep Render awake
     setInterval(() => {
         fetch('https://brokoons-backend-11yn.onrender.com/api/test')
             .then(() => console.log('🔄 Keep-alive ping'))
