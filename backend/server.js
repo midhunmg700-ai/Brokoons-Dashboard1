@@ -31,13 +31,12 @@ const TEAM_USERS = {
 ====================== */
 const MONGO_URI = process.env.MONGODB_URI;
 
-let db;
 let stockCollection;
 
 async function connectDB() {
   const client = new MongoClient(MONGO_URI);
   await client.connect();
-  db = client.db("brokoons");
+  const db = client.db("brokoons");
   stockCollection = db.collection("stock");
   console.log("✅ MongoDB connected");
 }
