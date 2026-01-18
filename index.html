@@ -1708,56 +1708,28 @@
     <!-- ANALYTICS MODAL (Dynamic) -->
     
     <!-- LOGIN SCREEN -->
-    <div class="login-form">
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="password" id="password" placeholder="Password" required>
-
-   
-
-   <!-- LOGIN SCREEN -->
-<div id="loginScreen" class="login-screen">
-    <div class="login-container">
-
-        <!-- Fixed Logo Section -->
-        <div class="logo-container">
-            <img src="brl2.png" alt="Brokoons Logo">
-            <h1>Brokoons Dashboard</h1>
-        </div>
-
-       button class="login-btn" onclick="login()">Login</button>
-
-   <!-- LOGIN SCREEN -->
-<div id="loginScreen" class="login-screen">
-    <div class="login-container">
-
-        <!-- Fixed Logo Section -->
-        <div class="logo-container">
-            <img src="brl2.png" alt="Brokoons Logo">
-            <h1>Brokoons Dashboard</h1>
-        </div>
-
-        <div class="login-form">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-
-            <button class="login-btn" onclick="login()">Login</button>
-
-            <!-- TEMP TEST BUTTON -->
-            <button onclick="testLogin()" style="margin-top:10px;">
-                Test Backend Login
-            </button>
-
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <!-- Fixed Logo Section -->
+            <div class="logo-container">
+                <img src="brl2.png" alt="Brokoons Logo" class="logo-img" 
+                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('logoEmoji').style.display='block';">
+                <div id="logoEmoji" class="logo-emoji">🍄</div>
+                <h1>Brokoons Dashboard</h1>
+            </div>
+            
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button class="login-btn" onclick="login()">Login</button>
+                <div id="loginError" class="error-message">Invalid username or password</div>
+            </div>
+            
             <div class="footer-text">
                 © 2026 Brokoons. Internal use only.
             </div>
         </div>
-
     </div>
-</div>
-
-    <!-- MAIN DASHBOARD -->
-    <div id="mainContent" class="main-content" style="display: none;">
-        <header class="header">
 
     <!-- MAIN DASHBOARD -->
     <div id="mainContent" class="main-content" style="display: none;">
@@ -2147,7 +2119,8 @@
     <!-- ========== JAVASCRIPT ========== -->
     <script>
         // ========== CONFIGURATION ==========
-       const API_URL = 'https://brokoons-backend.onrender.com';
+        // After deploying backend to Render/Railway/Heroku
+const API_URL = 'https://brokoons-backend.onrender.com';
         const TEAM_USERS = {
             "midhun": "1977",
             "akash": "2024", 
@@ -4089,12 +4062,11 @@ console.log('=== DASHBOARD DEBUG MODE ===');
 // Test all API endpoints
 async function testAllEndpoints() {
     const endpoints = [
-   const endpoints = [
-    { name: 'Tasks', url: `${API_URL}/api/tasks` },
-    { name: 'Stats', url: `${API_URL}/api/stats` },
-    { name: 'Chats', url: `${API_URL}/api/chats` },
-    { name: 'Test', url: `${API_URL}/api/test` }
-];
+        { name: 'Tasks', url: 'http://localhost:3000/api/tasks' },
+        { name: 'Stats', url: 'http://localhost:3000/api/stats' },
+        { name: 'Chats', url: 'http://localhost:3000/api/chats' },
+        { name: 'Test', url: 'http://localhost:3000/api/test' }
+    ];
 
     for (let endpoint of endpoints) {
         try {
@@ -4126,7 +4098,8 @@ async function testLogin() {
         console.error('❌ Login failed:', error);
     }
 }
-window.testLogin = testLogin;
+
+
 // Run tests when page loads
 setTimeout(() => {
     console.log('Running connection tests...');
@@ -4135,9 +4108,4 @@ setTimeout(() => {
 }, 1000);
 </script>
 </body>
-
 </html>
-
-
-
-
