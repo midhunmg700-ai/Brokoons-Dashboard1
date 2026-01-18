@@ -4069,8 +4069,6 @@ const endpoints = [
   { name: 'Chats', url: `${BASE}/api/chats` },
   { name: 'Test', url: `${BASE}/api/test` }
 ];
-
-
     for (let endpoint of endpoints) {
         try {
             const response = await fetch(endpoint.url);
@@ -4112,4 +4110,5 @@ setTimeout(() => {
 </script>
 </body>
 </html>
+
 
