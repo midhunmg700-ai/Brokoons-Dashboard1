@@ -4061,12 +4061,15 @@ console.log('=== DASHBOARD DEBUG MODE ===');
 
 // Test all API endpoints
 async function testAllEndpoints() {
-    const endpoints = [
-        { name: 'Tasks', url: 'http://localhost:3000/api/tasks' },
-        { name: 'Stats', url: 'http://localhost:3000/api/stats' },
-        { name: 'Chats', url: 'http://localhost:3000/api/chats' },
-        { name: 'Test', url: 'http://localhost:3000/api/test' }
-    ];
+    const BASE = 'https://brokoons-backend.onrender.com';
+
+const endpoints = [
+  { name: 'Tasks', url: `${BASE}/api/tasks` },
+  { name: 'Stats', url: `${BASE}/api/stats` },
+  { name: 'Chats', url: `${BASE}/api/chats` },
+  { name: 'Test', url: `${BASE}/api/test` }
+];
+
 
     for (let endpoint of endpoints) {
         try {
@@ -4109,3 +4112,4 @@ setTimeout(() => {
 </script>
 </body>
 </html>
+
