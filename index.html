@@ -2119,9 +2119,7 @@
     <!-- ========== JAVASCRIPT ========== -->
     <script>
         // ========== CONFIGURATION ==========
-        // After deploying backend to Render/Railway/Heroku
-const API_URL = 'https://brokoons-backend-11yn.onrender.com';
-
+        const API_URL = 'https://brokoons-backend-11yn.onrender.com';
         const TEAM_USERS = {
             "midhun": "1977",
             "akash": "2024", 
@@ -2150,9 +2148,6 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
             const savedTeam = localStorage.getItem('brokoons_team_members');
             teamMembers = savedTeam ? JSON.parse(savedTeam) : getDefaultTeam();
             
-            const savedStock = localStorage.getItem('brokoons_stock_items');
-            stockItems = savedStock ? JSON.parse(savedStock) : [];
-            
             const savedTodos = localStorage.getItem('brokoons_todo_items');
             todoItems = savedTodos ? JSON.parse(savedTodos) : getDefaultTodos();
             
@@ -2162,8 +2157,33 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
             const savedMemberPhotos = localStorage.getItem('brokoons_member_photos');
             memberPhotos = savedMemberPhotos ? JSON.parse(savedMemberPhotos) : {};
             
+            // Load stock from backend
+            loadStockFromBackend();
+            
             // Update dashboard with local data initially
             updateDashboardCounts();
+        }
+        
+        async function loadStockFromBackend() {
+            try {
+                console.log('📡 Loading stock from backend...');
+                const response = await fetch(`${API_URL}/api/stock`);
+                if (!response.ok) throw new Error('Failed to load stock');
+                
+                stockItems = await response.json();
+                console.log('✅ Stock loaded from backend:', stockItems.length, 'items');
+                
+                // Update UI
+                updateStockTable();
+                updateInventoryTable();
+                updateDashboardCounts();
+                
+            } catch (error) {
+                console.error('❌ Error loading stock from backend:', error);
+                // Initialize with empty array if backend fails
+                stockItems = [];
+                showNotification('⚠️ Backend Offline', 'Using local stock data', 'warning', 4000);
+            }
         }
         
         function getDefaultTeam() {
@@ -2263,21 +2283,19 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
         
         function saveAllData() {
             localStorage.setItem('brokoons_team_members', JSON.stringify(teamMembers));
-            localStorage.setItem('brokoons_stock_items', JSON.stringify(stockItems));
             localStorage.setItem('brokoons_todo_items', JSON.stringify(todoItems));
             localStorage.setItem('brokoons_photos', JSON.stringify(uploadedPhotos));
             localStorage.setItem('brokoons_member_photos', JSON.stringify(memberPhotos));
+            // Note: stockItems are no longer saved to localStorage
         }
         
         // ========== DASHBOARD UPDATES ==========
         function updateDashboardCounts() {
-            // Update with local data as fallback
             const stockCount = stockItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
-            const chatCount = 0; // Will be updated from backend
+            const chatCount = 0;
             const teamOnlineCount = teamMembers.filter(m => m.status === 'online').length;
             const photoCount = uploadedPhotos.length;
             
-            // Update UI elements
             document.getElementById('stock-count').textContent = stockCount;
             document.getElementById('chat-count').textContent = chatCount;
             document.getElementById('team-count').textContent = teamOnlineCount;
@@ -2326,8 +2344,8 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
                     showMainSystem();
                     initializeChat();
                     
-                    // Load backend data
-                    loadBackendData();
+                    // Load backend stock data
+                    loadStockFromBackend();
                     
                     // Hide error
                     if (errorElement) errorElement.style.display = 'none';
@@ -2355,7 +2373,7 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
                         showNotification('✅ Local Login Successful', `Welcome back, ${username}!`, 'success', 3000);
                         showMainSystem();
                         initializeChat();
-                        loadBackendData();
+                        loadStockFromBackend();
                         
                         if (errorElement) errorElement.style.display = 'none';
                     } else {
@@ -2393,6 +2411,7 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
                     showNotification('✅ Local Login (Backend Offline)', `Welcome back, ${username}!`, 'warning', 3000);
                     showMainSystem();
                     initializeChat();
+                    loadStockFromBackend();
                     
                     if (errorElement) errorElement.style.display = 'none';
                 } else {
@@ -2982,12 +3001,15 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
             });
         }
         
-        // ========== STOCK MANAGEMENT ==========
-        function updateStockTable() {
+        // ========== STOCK MANAGEMENT (BACKEND INTEGRATION) ==========
+        async function updateStockTable() {
             const tbody = document.getElementById('stock-table-body');
             let html = '';
             
-            stockItems.slice(0, 5).forEach(item => {
+            // Show recent 5 items
+            const recentItems = stockItems.slice(0, 5);
+            
+            recentItems.forEach(item => {
                 const badgeClass = item.status === "In Stock" ? "badge-success" : 
                                   item.status === "Low Stock" ? "badge-warning" : "badge-danger";
                 
@@ -2996,7 +3018,7 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
                         <td>${item.name}</td>
                         <td>${item.quantity}</td>
                         <td><span class="badge ${badgeClass}">${item.status}</span></td>
-                        <td>${item.lastUpdated}</td>
+                        <td>${item.lastUpdated || getCurrentDate()}</td>
                         <td>
                             <button class="btn btn-edit" onclick="editItem('${item.name}')">Edit</button>
                             <button class="btn btn-delete" onclick="deleteItem('${item.name}')">Remove</button>
@@ -3008,7 +3030,7 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
             tbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; color: #888;">No stock items yet</td></tr>';
         }
         
-        function updateInventoryTable() {
+        async function updateInventoryTable() {
             const tbody = document.getElementById('inventory-table');
             let html = '';
             let lowStockCount = 0;
@@ -3036,7 +3058,7 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
             document.getElementById('low-stock-count').textContent = `${lowStockCount} items need attention`;
         }
         
-        function addStockItem() {
+        async function addStockItem() {
             const name = prompt("Enter item name:");
             if (!name) return;
             
@@ -3045,52 +3067,107 @@ const API_URL = 'https://brokoons-backend-11yn.onrender.com';
             
             if (name && category && !isNaN(quantity)) {
                 const status = quantity > 30 ? "In Stock" : quantity > 10 ? "Low Stock" : "Out of Stock";
-                stockItems.unshift({ 
+                const newItem = { 
                     name, 
                     category, 
                     quantity, 
                     status, 
                     lastUpdated: getCurrentDate() 
-                });
+                };
                 
-                updateStockTable();
-                updateInventoryTable();
-                updateDashboardCounts();
-                saveAllData();
-                
-                showNotification('✅ Item Added', `${name} has been added to inventory.`, 'success', 3000);
+                try {
+                    // POST to backend
+                    const response = await fetch(`${API_URL}/api/stock`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(newItem)
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to add item');
+                    
+                    const addedItem = await response.json();
+                    stockItems.unshift(addedItem);
+                    
+                    updateStockTable();
+                    updateInventoryTable();
+                    updateDashboardCounts();
+                    
+                    showNotification('✅ Item Added', `${name} has been added to inventory.`, 'success', 3000);
+                } catch (error) {
+                    console.error('Error adding item:', error);
+                    showNotification('❌ Error', 'Failed to add item. Please try again.', 'error', 3000);
+                }
             }
         }
         
-        function editItem(itemName) {
+        async function editItem(itemName) {
             const item = stockItems.find(i => i.name === itemName);
             if (!item) return;
             
             const newQty = parseInt(prompt(`Edit quantity for ${itemName}:`, item.quantity));
             if (!isNaN(newQty)) {
-                item.quantity = newQty;
-                item.status = newQty > 30 ? "In Stock" : newQty > 10 ? "Low Stock" : "Out of Stock";
-                item.lastUpdated = getCurrentDate();
+                const updatedItem = {
+                    ...item,
+                    quantity: newQty,
+                    status: newQty > 30 ? "In Stock" : newQty > 10 ? "Low Stock" : "Out of Stock",
+                    lastUpdated: getCurrentDate()
+                };
+                
+                try {
+                    // PUT to backend
+                    const response = await fetch(`${API_URL}/api/stock/${encodeURIComponent(itemName)}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(updatedItem)
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to update item');
+                    
+                    // Update local array
+                    const index = stockItems.findIndex(i => i.name === itemName);
+                    if (index !== -1) {
+                        stockItems[index] = updatedItem;
+                    }
+                    
+                    updateStockTable();
+                    updateInventoryTable();
+                    updateDashboardCounts();
+                    
+                    showNotification('✅ Item Updated', `${itemName} quantity updated to ${newQty}.`, 'success', 3000);
+                } catch (error) {
+                    console.error('Error updating item:', error);
+                    showNotification('❌ Error', 'Failed to update item. Please try again.', 'error', 3000);
+                }
+            }
+        }
+        
+        async function deleteItem(itemName) {
+            if (!confirm(`Delete "${itemName}" from inventory?`)) return;
+            
+            try {
+                // DELETE from backend
+                const response = await fetch(`${API_URL}/api/stock/${encodeURIComponent(itemName)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Failed to delete item');
+                
+                // Update local array
+                stockItems = stockItems.filter(i => i.name !== itemName);
                 
                 updateStockTable();
                 updateInventoryTable();
                 updateDashboardCounts();
-                saveAllData();
                 
-                showNotification('✅ Item Updated', `${itemName} quantity updated to ${newQty}.`, 'success', 3000);
+                showNotification('🗑️ Item Deleted', `${itemName} has been removed.`, 'info', 3000);
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                showNotification('❌ Error', 'Failed to delete item. Please try again.', 'error', 3000);
             }
-        }
-        
-        function deleteItem(itemName) {
-            if (!confirm(`Delete "${itemName}" from inventory?`)) return;
-            
-            stockItems = stockItems.filter(i => i.name !== itemName);
-            updateStockTable();
-            updateInventoryTable();
-            updateDashboardCounts();
-            saveAllData();
-            
-            showNotification('🗑️ Item Deleted', `${itemName} has been removed.`, 'info', 3000);
         }
         
         function showLowStock() {
@@ -4062,13 +4139,14 @@ console.log('=== DASHBOARD DEBUG MODE ===');
 
 // Test all API endpoints
 async function testAllEndpoints() {
-    const BASE = 'https://brokoons-backend.onrender.com';
+    const BASE = 'https://brokoons-backend-11yn.onrender.com';
 
 const endpoints = [
   { name: 'Tasks', url: `${BASE}/api/tasks` },
   { name: 'Stats', url: `${BASE}/api/stats` },
   { name: 'Chats', url: `${BASE}/api/chats` },
-  { name: 'Test', url: `${BASE}/api/test` }
+  { name: 'Test', url: `${BASE}/api/test` },
+  { name: 'Stock', url: `${BASE}/api/stock` }
 ];
     for (let endpoint of endpoints) {
         try {
@@ -4111,6 +4189,3 @@ setTimeout(() => {
 </script>
 </body>
 </html>
-
-
-
