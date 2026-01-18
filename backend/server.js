@@ -1,109 +1,126 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const { MongoClient } = require('mongodb');
 
 const app = express();
 
-// ========================
-// MIDDLEWARE
-// ========================
+/* ======================
+   MIDDLEWARE
+====================== */
 app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type']
 }));
-
 app.use(express.json());
 
-// ========================
-// USERS
-// ========================
+/* ======================
+   USERS (LOGIN)
+====================== */
 const TEAM_USERS = {
-    midhun: "1977",
-    akash: "2024",
-    sajad: "5550",
-    saran: "2244",
-    muhammad: "1415"
+  midhun: "1977",
+  akash: "2024",
+  sajad: "5550",
+  saran: "2244",
+  muhammad: "1415"
 };
 
-// ========================
-// SHARED DATA (FOR EVERYONE)
-// ========================
-let stockItems = [];
+/* ======================
+   MONGODB CONNECTION
+====================== */
+const MONGO_URI = process.env.MONGODB_URI;
 
-// ========================
-// ROUTES
-// ========================
+let db;
+let stockCollection;
+
+async function connectDB() {
+  const client = new MongoClient(MONGO_URI);
+  await client.connect();
+  db = client.db("brokoons");
+  stockCollection = db.collection("stock");
+  console.log("✅ MongoDB connected");
+}
+
+connectDB().catch(console.error);
+
+/* ======================
+   ROUTES
+====================== */
+
+// test
 app.get('/api/test', (req, res) => {
-    res.json({
-        status: '✅ Backend Working!',
-        time: new Date().toISOString()
-    });
+  res.json({
+    status: "✅ Backend Working!",
+    time: new Date().toISOString()
+  });
 });
 
+// login
 app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    if (TEAM_USERS[username] && TEAM_USERS[username] === password) {
-        res.json({
-            success: true,
-            user: {
-                name: username,
-                role: username === 'midhun' ? 'admin' : 'user'
-            }
-        });
-    } else {
-        res.status(401).json({
-            success: false,
-            message: 'Invalid credentials'
-        });
-    }
+  if (TEAM_USERS[username] === password) {
+    res.json({
+      success: true,
+      user: {
+        name: username,
+        role: username === 'midhun' ? 'admin' : 'user'
+      }
+    });
+  } else {
+    res.status(401).json({ success: false });
+  }
 });
 
-// ===== STOCK (SHARED) =====
-app.get('/api/stock', (req, res) => {
-    res.json(stockItems);
+/* ===== STOCK (SHARED FOR EVERYONE) ===== */
+
+// get all stock
+app.get('/api/stock', async (req, res) => {
+  const items = await stockCollection.find({}).toArray();
+  res.json(items);
 });
 
-app.post('/api/stock', (req, res) => {
-    const item = {
-        ...req.body,
-        lastUpdated: new Date().toISOString()
-    };
-    stockItems.unshift(item);
-    res.json({ success: true, stockItems });
+// add stock
+app.post('/api/stock', async (req, res) => {
+  const item = {
+    ...req.body,
+    lastUpdated: new Date().toISOString()
+  };
+  await stockCollection.insertOne(item);
+  res.json({ success: true });
 });
 
-app.put('/api/stock/:name', (req, res) => {
-    const { name } = req.params;
-    const { quantity, status } = req.body;
+// update stock
+app.put('/api/stock/:name', async (req, res) => {
+  const { name } = req.params;
+  const { quantity, status } = req.body;
 
-    const item = stockItems.find(i => i.name === name);
-    if (item) {
-        item.quantity = quantity;
-        item.status = status;
-        item.lastUpdated = new Date().toISOString();
-    }
+  await stockCollection.updateOne(
+    { name },
+    { $set: { quantity, status, lastUpdated: new Date().toISOString() } }
+  );
 
-    res.json({ success: true, stockItems });
+  res.json({ success: true });
 });
 
-app.delete('/api/stock/:name', (req, res) => {
-    stockItems = stockItems.filter(i => i.name !== req.params.name);
-    res.json({ success: true, stockItems });
+// delete stock
+app.delete('/api/stock/:name', async (req, res) => {
+  const { name } = req.params;
+  await stockCollection.deleteOne({ name });
+  res.json({ success: true });
 });
 
-// ========================
-// START SERVER
-// ========================
+/* ======================
+   START SERVER
+====================== */
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 
-    setInterval(() => {
-        fetch('https://brokoons-backend-11yn.onrender.com/api/test')
-            .then(() => console.log('🔄 Keep-alive ping'))
-            .catch(() => {});
-    }, 300000);
+  // keep Render awake
+  setInterval(() => {
+    fetch(`${process.env.RENDER_EXTERNAL_URL}/api/test`).catch(() => {});
+  }, 300000);
 });
