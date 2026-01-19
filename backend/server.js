@@ -28,7 +28,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // MONGODB
 // ========================
 let client, db;
-let stockCollection, chatCollection, photosCollection, tasksCollection, qualityCollection;
+let stockCollection,
+    chatCollection,
+    photosCollection,
+    tasksCollection,
+    qualityCollection,
+    presenceCollection;
 
 async function connectToMongoDB() {
     const MONGODB_URI = process.env.MONGODB_URI;
@@ -38,7 +43,7 @@ async function connectToMongoDB() {
     }
 
     try {
-        client = new MongoClient(MONGODB_URI); // ✅ FIXED
+        client = new MongoClient(MONGODB_URI);
         await client.connect();
 
         db = client.db('brokoons');
@@ -48,8 +53,10 @@ async function connectToMongoDB() {
         photosCollection = db.collection('photos');
         tasksCollection = db.collection('tasks');
         qualityCollection = db.collection('quality');
+        presenceCollection = db.collection('user_presence');
 
         await chatCollection.createIndex({ timestamp: 1 });
+        await presenceCollection.createIndex({ lastSeen: 1 });
 
         console.log('✅ MongoDB connected successfully');
     } catch (err) {
@@ -96,17 +103,40 @@ app.post('/api/login', (req, res) => {
     }
 });
 
+// ===== USER PRESENCE =====
+app.post('/api/presence/ping', async (req, res) => {
+    const { username } = req.body;
+    if (!username) return res.sendStatus(400);
+
+    await presenceCollection.updateOne(
+        { username },
+        { $set: { lastSeen: Date.now() } },
+        { upsert: true }
+    );
+
+    res.sendStatus(200);
+});
+
+app.get('/api/presence/online', async (req, res) => {
+    const since = Date.now() - 30000; // 30 sec
+    const users = await presenceCollection
+        .find({ lastSeen: { $gte: since } })
+        .project({ _id: 0, username: 1 })
+        .toArray();
+
+    res.json(users.map(u => u.username));
+});
+
 // ===== STOCK =====
 app.get('/api/stock', async (req, res) => {
     res.json(await stockCollection.find({}).toArray());
 });
 
 app.post('/api/stock', async (req, res) => {
-    const item = {
+    await stockCollection.insertOne({
         ...req.body,
         lastUpdated: new Date().toISOString()
-    };
-    await stockCollection.insertOne(item);
+    });
     res.json({ success: true });
 });
 
@@ -123,7 +153,7 @@ app.delete('/api/stock/:name', async (req, res) => {
     res.json({ success: true });
 });
 
-// ===== CHAT (SHARED FOR EVERYONE) =====
+// ===== CHAT =====
 app.get('/api/chat', async (req, res) => {
     const messages = await chatCollection
         .find({})
@@ -150,7 +180,9 @@ app.post('/api/chat', async (req, res) => {
 
 // ===== PHOTOS =====
 app.get('/api/photos', async (req, res) => {
-    res.json(await photosCollection.find({}).sort({ timestamp: -1 }).toArray());
+    res.json(
+        await photosCollection.find({}).sort({ timestamp: -1 }).toArray()
+    );
 });
 
 app.post('/api/photos', async (req, res) => {
@@ -181,38 +213,3 @@ app.post('/api/tasks', async (req, res) => {
 
 app.put('/api/tasks/:id', async (req, res) => {
     await tasksCollection.updateOne(
-        { _id: new ObjectId(req.params.id) },
-        { $set: req.body }
-    );
-    res.json({ success: true });
-});
-
-app.delete('/api/tasks/:id', async (req, res) => {
-    await tasksCollection.deleteOne({ _id: new ObjectId(req.params.id) });
-    res.json({ success: true });
-});
-
-// ===== QUALITY =====
-app.get('/api/quality', async (req, res) => {
-    res.json(await qualityCollection.find({}).toArray());
-});
-
-app.post('/api/quality', async (req, res) => {
-    await qualityCollection.insertOne({
-        ...req.body,
-        timestamp: Date.now()
-    });
-    res.json({ success: true });
-});
-
-// ========================
-// START SERVER
-// ========================
-async function start() {
-    await connectToMongoDB();
-    app.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT}`);
-    });
-}
-
-start();
