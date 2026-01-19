@@ -2113,6 +2113,7 @@
         let currentMemberForPhoto = null;
         let unreadMessages = 0;
         let analyticsModal = null;
+        let chatRefreshInterval = null;
         
         // ========== DATA STORAGE ==========
         let teamMembers = [];
@@ -2379,6 +2380,9 @@
         }
         
         function logout() {
+            // Stop chat auto-refresh
+            stopChatAutoRefresh();
+            
             if (currentUser) {
                 const teamMember = teamMembers.find(member => 
                     member.name.toLowerCase().includes(currentUser)
@@ -2465,6 +2469,25 @@
             }
         }
         
+        function startChatAutoRefresh() {
+            // Clear any existing interval
+            if (chatRefreshInterval) {
+                clearInterval(chatRefreshInterval);
+            }
+            
+            // Start new interval - refresh every 3 seconds
+            chatRefreshInterval = setInterval(loadChatMessages, 3000);
+            console.log('💬 Chat auto-refresh started (every 3 seconds)');
+        }
+        
+        function stopChatAutoRefresh() {
+            if (chatRefreshInterval) {
+                clearInterval(chatRefreshInterval);
+                chatRefreshInterval = null;
+                console.log('💬 Chat auto-refresh stopped');
+            }
+        }
+        
         function showTeamChat() {
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
@@ -2476,6 +2499,9 @@
             
             document.getElementById('team-chat-section').classList.add('active');
             document.getElementById('chatLink').style.backgroundColor = 'rgba(27, 94, 32, 0.3)';
+            
+            // Start auto-refresh when chat is opened
+            startChatAutoRefresh();
             
             unreadMessages = 0;
             updateUnreadCount();
@@ -2489,6 +2515,10 @@
         function hideTeamChat() {
             document.getElementById('team-chat-section').classList.remove('active');
             document.getElementById('chatLink').style.backgroundColor = '';
+            
+            // Stop auto-refresh when chat is closed
+            stopChatAutoRefresh();
+            
             showTab('dashboard');
         }
         
@@ -2720,6 +2750,9 @@
             
             document.getElementById('team-chat-section').classList.remove('active');
             document.getElementById('chatLink').style.backgroundColor = '';
+            
+            // Stop chat auto-refresh when switching tabs
+            stopChatAutoRefresh();
             
             if (tabName === 'dashboard') {
                 updateStockTable();
