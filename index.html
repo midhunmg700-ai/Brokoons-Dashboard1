@@ -2504,51 +2504,52 @@
             
             showTab('dashboard');
         }
-        
-        function updateChatMessages(messages) {
-            const chatContainer = document.getElementById("chatMessages");
-            if (!chatContainer) return;
-            
-            const noMessages = document.getElementById('noMessages');
-            
-            if (messages.length === 0) {
-                noMessages.style.display = 'block';
-                chatContainer.innerHTML = '';
-                return;
-            }
-            
-            noMessages.style.display = 'none';
-            
-            let html = '';
-            messages.forEach(message => {
-                const isOwnMessage = message.senderId === currentUser;
-                const messageClass = isOwnMessage ? 'message sent' : 'message received';
-                const time = formatTime(message.timestamp);
-                
-                html += `
-                    <div class="${messageClass}">
-                        <div class="message-header">
-                            <span class="message-sender">${message.sender}</span>
-                            <span class="message-time">${time}</span>
-                        </div>
-                        <div class="message-content">${message.text}</div>
-                        ${isOwnMessage ? `
-                            <div class="message-status">
-                                <span>✅</span>
-                                <span>Delivered</span>
-                            </div>
-                        ` : ''}
+  function updateChatMessages(messages) {
+    const chatContainer = document.getElementById("chatMessages");
+    const chatEmpty = document.getElementById("chatEmpty");
+    const chatWrapper = document.getElementById("chatWrapper");
+    const noMessages = document.getElementById("noMessages");
+
+    // ONLY guard chatContainer
+    if (!chatContainer) return;
+
+    if (messages.length === 0) {
+        if (noMessages) noMessages.style.display = 'block';
+        chatContainer.innerHTML = '';
+        return;
+    }
+
+    if (noMessages) noMessages.style.display = 'none';
+    if (chatWrapper) chatWrapper.style.display = 'block';
+    if (chatEmpty) chatEmpty.style.display = 'none';
+
+    let html = '';
+    messages.forEach(message => {
+        const isOwnMessage = message.senderId === currentUser;
+        const messageClass = isOwnMessage ? 'message sent' : 'message received';
+        const time = formatTime(message.timestamp);
+
+        html += `
+            <div class="${messageClass}">
+                <div class="message-header">
+                    <span class="message-sender">${message.sender}</span>
+                    <span class="message-time">${time}</span>
+                </div>
+                <div class="message-content">${message.text}</div>
+                ${isOwnMessage ? `
+                    <div class="message-status">
+                        <span>✅</span>
+                        <span>Delivered</span>
                     </div>
-                `;
-            });
-            
-            chatContainer.innerHTML = html;
-            
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 100);
-        }
-        
+                ` : ''}
+            </div>
+        `;
+    });
+
+    chatContainer.innerHTML = html;
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
         async function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
@@ -4176,3 +4177,4 @@
     </script>
 </body>
 </html>
+
