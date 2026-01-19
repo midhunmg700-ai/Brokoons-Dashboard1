@@ -2113,6 +2113,7 @@ let currentMemberForPhoto = null;
 let unreadMessages = 0;
 let analyticsModal = null;
 let lastChatCount = 0; 
+let lastPresencePing = 0;
         // ========== DATA STORAGE ==========
         let teamMembers = [];
         let stockItems = [];
@@ -2413,7 +2414,7 @@ let lastChatCount = 0;
             document.getElementById('username').focus();
         }
         
-     function showMainSystem() {
+function showMainSystem() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('currentUser').textContent = currentUser;
@@ -2425,34 +2426,32 @@ let lastChatCount = 0;
     document.getElementById('current-date').textContent = `Today: ${getCurrentDate()}`;
     showTab('dashboard');
 
-    // Setup search
-    const searchInput = document.getElementById('search-stock');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#inventory-table tr');
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-    }
-
-    // Setup notifications
-    setupNotifications();
-
-    // Start chat auto-refresh
+    // ===== CHAT AUTO REFRESH =====
     if (!window.chatInterval) {
         window.chatInterval = setInterval(loadChatMessages, 3000);
-        console.log('💬 Chat auto-refresh started (3 seconds)');
     }
 
-    // Start user presence
+    // ===== USER PRESENCE =====
     startPresence();
+
+    if (!window.presencePingInterval) {
+        window.presencePingInterval = setInterval(startPresence, 10000);
+    }
+
     if (!window.presenceInterval) {
         window.presenceInterval = setInterval(loadOnlineUsers, 5000);
     }
-}  // ✅ THIS WAS MISSING
+}
+function startPresence() {
+    if (!currentUser) return;
+
+    fetch(`${API_URL}/api/presence/ping`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser })
+    }).catch(() => {});
+}
+
 
 function updateAllTables() {
     updateStockTable();
@@ -4185,6 +4184,7 @@ function updateAllTables() {
     </script>
 </body>
 </html>
+
 
 
 
