@@ -8,7 +8,7 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1b5e20">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <!-- PWA Manifest -->
@@ -2506,12 +2506,14 @@
         }
         
         function updateChatMessages(messages) {
-            const chatMessages = document.getElementById('chatMessages');
+            const chatContainer = document.getElementById("chatMessages");
+            if (!chatContainer) return;
+            
             const noMessages = document.getElementById('noMessages');
             
             if (messages.length === 0) {
                 noMessages.style.display = 'block';
-                chatMessages.innerHTML = '';
+                chatContainer.innerHTML = '';
                 return;
             }
             
@@ -2540,10 +2542,10 @@
                 `;
             });
             
-            chatMessages.innerHTML = html;
+            chatContainer.innerHTML = html;
             
             setTimeout(() => {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
             }, 100);
         }
         
