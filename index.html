@@ -2506,12 +2506,15 @@
         }
   function updateChatMessages(messages) {
     const chatContainer = document.getElementById("chatMessages");
+    if (!chatContainer) return;
+
+    // ✅ STOP flicker
+    if (messages.length === lastChatCount) return;
+    lastChatCount = messages.length;
+
     const chatEmpty = document.getElementById("chatEmpty");
     const chatWrapper = document.getElementById("chatWrapper");
     const noMessages = document.getElementById("noMessages");
-
-    // ONLY guard chatContainer
-    if (!chatContainer) return;
 
     if (messages.length === 0) {
         if (noMessages) noMessages.style.display = 'block';
@@ -2549,6 +2552,7 @@
     chatContainer.innerHTML = html;
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+
 
         async function sendMessage() {
             const input = document.getElementById('chatInput');
@@ -4177,4 +4181,5 @@
     </script>
 </body>
 </html>
+
 
