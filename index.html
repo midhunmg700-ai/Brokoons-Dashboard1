@@ -2413,48 +2413,53 @@ let lastChatCount = 0;
             document.getElementById('username').focus();
         }
         
-        function showMainSystem() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('currentUser').textContent = currentUser;
-            
-            updateAllTables();
-            updatePhotoGallery();
-            updateDashboardCounts();
-            
-            document.getElementById('current-date').textContent = `Today: ${getCurrentDate()}`;
-            
-            showTab('dashboard');
-            
-            // Setup search
-            const searchInput = document.getElementById('search-stock');
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase();
-                    const rows = document.querySelectorAll('#inventory-table tr');
-                    rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
-                });
-            }
-            
-            // Setup notifications
-            setupNotifications();
-            
-            // Start chat auto-refresh interval
-            if (!window.chatInterval) {
-                window.chatInterval = setInterval(loadChatMessages, 3000);
-                console.log('💬 Chat auto-refresh started (3 seconds)');
-            }
-        }
-        
-        function updateAllTables() {
-            updateStockTable();
-            updateInventoryTable();
-            updateTeamTable();
-        }
-        
+     function showMainSystem() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('currentUser').textContent = currentUser;
+
+    updateAllTables();
+    updatePhotoGallery();
+    updateDashboardCounts();
+
+    document.getElementById('current-date').textContent = `Today: ${getCurrentDate()}`;
+    showTab('dashboard');
+
+    // Setup search
+    const searchInput = document.getElementById('search-stock');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#inventory-table tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+
+    // Setup notifications
+    setupNotifications();
+
+    // Start chat auto-refresh
+    if (!window.chatInterval) {
+        window.chatInterval = setInterval(loadChatMessages, 3000);
+        console.log('💬 Chat auto-refresh started (3 seconds)');
+    }
+
+    // Start user presence
+    startPresence();
+    if (!window.presenceInterval) {
+        window.presenceInterval = setInterval(loadOnlineUsers, 5000);
+    }
+}  // ✅ THIS WAS MISSING
+
+function updateAllTables() {
+    updateStockTable();
+    updateInventoryTable();
+    updateTeamTable();
+}
+
         // ========== TEAM CHAT SYSTEM (BACKEND API) ==========
         async function loadChatMessages() {
             try {
@@ -4180,6 +4185,7 @@ let lastChatCount = 0;
     </script>
 </body>
 </html>
+
 
 
 
