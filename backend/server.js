@@ -28,12 +28,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // MONGODB
 // ========================
 let client, db;
-let stockCollection,
-    chatCollection,
-    photosCollection,
-    tasksCollection,
-    qualityCollection,
-    presenceCollection;
+let stockCollection;
+let chatCollection;
+let photosCollection;
+let tasksCollection;
+let qualityCollection;
+let presenceCollection;
 
 async function connectToMongoDB() {
     const MONGODB_URI = process.env.MONGODB_URI;
@@ -42,37 +42,23 @@ async function connectToMongoDB() {
         process.exit(1);
     }
 
-    try {
-        client = new MongoClient(MONGODB_URI);
-        await client.connect();
+    client = new MongoClient(MONGODB_URI);
+    await client.connect();
 
-        db = client.db('brokoons');
+    db = client.db('brokoons');
 
-        stockCollection = db.collection('stock');
-        chatCollection = db.collection('chat');
-        photosCollection = db.collection('photos');
-        tasksCollection = db.collection('tasks');
-        qualityCollection = db.collection('quality');
-        presenceCollection = db.collection('user_presence');
+    stockCollection = db.collection('stock');
+    chatCollection = db.collection('chat');
+    photosCollection = db.collection('photos');
+    tasksCollection = db.collection('tasks');
+    qualityCollection = db.collection('quality');
+    presenceCollection = db.collection('user_presence');
 
-        await chatCollection.createIndex({ timestamp: 1 });
-        await presenceCollection.createIndex({ lastSeen: 1 });
+    await chatCollection.createIndex({ timestamp: 1 });
+    await presenceCollection.createIndex({ lastSeen: 1 });
 
-        console.log('✅ MongoDB connected successfully');
-    } catch (err) {
-        console.error('❌ MongoDB connection error:', err);
-        process.exit(1);
-    }
+    console.log('✅ MongoDB connected successfully');
 }
-
-// ========================
-// KEEP ALIVE (RENDER)
-// ========================
-setInterval(() => {
-    if (process.env.RENDER_EXTERNAL_URL) {
-        fetch(`${process.env.RENDER_EXTERNAL_URL}/api/test`).catch(() => {});
-    }
-}, 300000);
 
 // ========================
 // ROUTES
@@ -80,8 +66,7 @@ setInterval(() => {
 app.get('/api/test', (req, res) => {
     res.json({
         status: 'OK',
-        time: new Date().toISOString(),
-        database: db ? 'connected' : 'disconnected'
+        time: new Date().toISOString()
     });
 });
 
@@ -118,7 +103,7 @@ app.post('/api/presence/ping', async (req, res) => {
 });
 
 app.get('/api/presence/online', async (req, res) => {
-    const since = Date.now() - 30000; // 30 sec
+    const since = Date.now() - 30000;
     const users = await presenceCollection
         .find({ lastSeen: { $gte: since } })
         .project({ _id: 0, username: 1 })
@@ -155,10 +140,7 @@ app.delete('/api/stock/:name', async (req, res) => {
 
 // ===== CHAT =====
 app.get('/api/chat', async (req, res) => {
-    const messages = await chatCollection
-        .find({})
-        .sort({ timestamp: 1 })
-        .toArray();
+    const messages = await chatCollection.find({}).sort({ timestamp: 1 }).toArray();
     res.json(messages);
 });
 
@@ -180,9 +162,7 @@ app.post('/api/chat', async (req, res) => {
 
 // ===== PHOTOS =====
 app.get('/api/photos', async (req, res) => {
-    res.json(
-        await photosCollection.find({}).sort({ timestamp: -1 }).toArray()
-    );
+    res.json(await photosCollection.find({}).sort({ timestamp: -1 }).toArray());
 });
 
 app.post('/api/photos', async (req, res) => {
@@ -213,3 +193,38 @@ app.post('/api/tasks', async (req, res) => {
 
 app.put('/api/tasks/:id', async (req, res) => {
     await tasksCollection.updateOne(
+        { _id: new ObjectId(req.params.id) },
+        { $set: req.body }
+    );
+    res.json({ success: true });
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+    await tasksCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ success: true });
+});
+
+// ===== QUALITY =====
+app.get('/api/quality', async (req, res) => {
+    res.json(await qualityCollection.find({}).toArray());
+});
+
+app.post('/api/quality', async (req, res) => {
+    await qualityCollection.insertOne({
+        ...req.body,
+        timestamp: Date.now()
+    });
+    res.json({ success: true });
+});
+
+// ========================
+// START SERVER
+// ========================
+async function start() {
+    await connectToMongoDB();
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+    });
+}
+
+start();
